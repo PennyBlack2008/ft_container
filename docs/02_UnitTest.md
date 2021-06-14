@@ -1,5 +1,7 @@
 # 구글 테스트
 
+[공식 사이트](https://google.github.io/googletest/primer.html)
+[번역 링크](https://jungwoong.tistory.com/75)
 [슬라이드 링크](https://www.slideshare.net/jinhwason/ss-69528881)
 [예시 링크1](https://github.com/dmonopoly/gtest-cmake-example)
 [예시 링크2](https://github.com/kaizouman/gtest-cmake-example)
