@@ -47,3 +47,6 @@ template <class T, class Alloc = allocator<t> > class vector; // generic templat
  스토리지 할당 모델을 정의하는 데 사용되는 할당자 개체의 유형입니다. 기본적으로 가장 간단한 메모리 할당 모델을 정의하고 값에 독립적 인 할당 자 클래스 템플릿이 사용됩니다.
 멤버 유형 벡터 :: allocator_type으로 별칭이 지정됩니다.
 
+## Vector 만들기(자세한 설명)
+
+[모두의 코드](https://modoocode.com/219)

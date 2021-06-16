@@ -1,14 +1,13 @@
-// https://github.com/Glagan/42-ft_containers/commits/master?after=04582bb773e2319256c11fa525e1896d1aaf28e2+69&branch=master
 // https://github.com/Glagan/42-ft_containers/commit/bf285b00f70768ddd2b0a23c2bf1d8688d2bd720
 #include <iostream>
-#include <vector>
+#include "vector.hpp"
 
 int main(void)
 {
-    std::vector<int> vector;
+    ft::vector<int> vector;
     std::cout << "Empty vector: " << std::endl;
-    std::vector<int>::iterator it = vector.begin();
-    std::vector<int>::iterator ite = vector.end();
+    ft::vector<int>::iterator it = vector.begin();
+    ft::vector<int>::iterator ite = vector.end();
     while (it != ite)
     {
         std::cout << *it << std::endl;
@@ -54,8 +53,8 @@ int main(void)
 
     // Reverse
     std::cout << "502 elements in vector(reverse_iterator): " << std::endl;
-    std::vector<int>::reverse_iterator rit = vector.rbegin();
-    std::vector<int>::reverse_iterator rite = vector.rend();
+    ft::vector<int>::reverse_iterator rit = vector.rbegin();
+    ft::vector<int>::reverse_iterator rite = vector.rend();
     while (rit != rite)
     {
         std::cout << *rit;
