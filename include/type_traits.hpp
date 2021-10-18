@@ -10,15 +10,15 @@ namespace ft {
 	template<bool, typename>
 	struct enable_if { };
 
-	template<typename TP>
-	struct enable_if<true, TP> {
-		typedef TP type;
+	template<typename T>
+	struct enable_if<true, T> {
+		typedef T type;
 	};
 
-	template<typename TP, TP v>
+	template<typename T, T v>
 	struct integral_constant {
-		static const TP			value = v;
-		typedef TP					value_type;
+		static const T			value = v;
+		typedef T					value_type;
 		typedef integral_constant	type;
 		operator value_type() const {
 			return value;
@@ -28,34 +28,34 @@ namespace ft {
 	/*----
 	remove
 	----*/
-	template<typename TP>
+	template<typename T>
 	struct remove_volatile {
-		typedef TP type;
+		typedef T type;
 	};
 
-	template<typename TP>
-	struct remove_volatile<volatile TP> {
-		typedef TP type;
+	template<typename T>
+	struct remove_volatile<volatile T> {
+		typedef T type;
 	};
 
-	template<typename TP>
+	template<typename T>
 	struct remove_const {
-		typedef TP type;
+		typedef T type;
 	};
 
-	template<typename TP>
-	struct remove_const<const TP> {
-		typedef TP type;
+	template<typename T>
+	struct remove_const<const T> {
+		typedef T type;
 	};
 
-	template<typename TP>
+	template<typename T>
 	struct remove_cv {
-		typedef typename remove_volatile<typename remove_const<TP>::type>::type type;
+		typedef typename remove_volatile<typename remove_const<T>::type>::type type;
 	};
 
 	// is_integral 이미 존재하고 있음.
-	template<typename TP>
-	struct is_integral : integral_constant<bool, is_integral(TP)> { };
+	template<typename T>
+	struct is_integral : integral_constant<bool, is_integral(T)> { };
 }
 
 #endif

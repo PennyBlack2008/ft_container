@@ -6,8 +6,18 @@
 
 namespace ft
 {
-  template <typename T>
-  class vector {
+  template <typename T, typename Alloc = std::allocator<T> >
+  class vector
+  {
+  private:
+    typedef vector<T, Alloc>								          	vector_type;
+    typedef typename Base::T_alloc_type					      	T_alloc_type;
+  public:
+    typedef T value_type;
+    typedef typename T_alloc_type::pointer				    	pointer;
+    typedef ft::normal_iterator<pointer, vector_type>   iterator;
+    typedef Alloc                                       allocator_type;
+
     T* data;
     int capacity;
     int length;
@@ -22,24 +32,33 @@ namespace ft
         data[i] = m;
     }
     /* 3. range constructor */
-    const_iterator begin() const
-		{
-			return (const_iterator(&_container[0]));
-		}
+    template <class InputIterator>
+      vector(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type(),
+              typename ft::enable_if<!ft::is_integral<InputIterator>::value>::type* = 0)
+              : alloc(alloc), size(0), capacity(2 * size)
+      {
+        container = alloc.allocate(capacity);
+        assign(first, last);
+      }
 
 		iterator begin()
 		{
-			return (iterator(&_container[0]));
+			return (iterator(&container[0]));
 		}
 
-		const_iterator end() const
+    const_iterator begin() const
 		{
-			return (const_iterator(&_container[_size]));
+			return (const_iterator(&container[0]));
 		}
 
 		iterator end()
 		{
-			return (iterator(&_container[_size]));
+			return (iterator(&container[size]));
+		}
+
+		const_iterator end() const
+		{
+			return (const_iterator(&container[size]));
 		}
     
     // 맨 뒤에 새로운 원소를 추가한다.
@@ -79,6 +98,17 @@ namespace ft
 }
 
 int main() {
+  /* 3. iterating through second */
+  std::vector<int> std_second(4, 100);
+  for (std::vector<int>::iterator it = std_second.begin(); it != std_second.end(); ++it)
+    std::cout << ' ' << *it;
+  std::cout << '\n';
+
+  ft::vector<int> ft_second(4, 100);
+  for (ft::vector<int>::iterator it = ft_second.begin(); it != ft_second.end(); ++it)
+    std::cout << ' ' << *it;
+  std::cout << '\n';
+
   /* 2. fill constructor */
   std::vector<int> basic_vec(4, 100);
   std::cout << basic_vec.size() << std::endl;
