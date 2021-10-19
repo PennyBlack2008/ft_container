@@ -1,5 +1,5 @@
-#ifndef ALGORITHM_HPP
-#define ALGORITHM_HPP
+#ifndef _ALGORITHM_HPP_
+#define _ALGORITHM_HPP_
 
 #include <algorithm>
 #include "cpp_type_traits.hpp"

@@ -1,5 +1,5 @@
-#ifndef UNINITIALIZED_HPP
-#define UNINITIALIZED_HPP
+#ifndef _UNINITIALIZED_HPP_
+#define _UNINITIALIZED_HPP_
 
 #include <algorithm>
 #include "construct.hpp"

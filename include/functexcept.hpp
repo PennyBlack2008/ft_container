@@ -1,5 +1,5 @@
-#ifndef FUNCTEXCEPT_HPP
-#define FUNCTEXCEPT_HPP
+#ifndef _FUNCTEXCEPT_HPP_
+#define _FUNCTEXCEPT_HPP_
 
 #include <exception>
 #include <string>

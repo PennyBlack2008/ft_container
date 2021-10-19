@@ -1,5 +1,5 @@
-#ifndef TYPE_TRAITS_HPP
-#define TYPE_TRAITS_HPP
+#ifndef _TYPE_TRAITS_HPP_
+#define _TYPE_TRAITS_HPP_
 
 #include <__config>
 #include <cstddef>

@@ -1,5 +1,5 @@
-#ifndef CONSTRUCT_HPP
-#define CONSTRUCT_HPP
+#ifndef _CONSTRUCT_HPP_
+#define _CONSTRUCT_HPP_
 
 #include <new>
 #include "cpp_type_traits.hpp"
@@ -15,9 +15,9 @@ namespace ft {
 		new (static_cast<void*>(p))T1();
 	}
 
-	template<class Tp>
-	inline void Destroy(Tp* pointer) {
-		pointer->~Tp();
+	template<class T>
+	inline void Destroy(T* pointer) {
+		pointer->~T();
 	}
 
 	template<class ForwardIterator>
@@ -32,12 +32,12 @@ namespace ft {
 
 	template<class ForwardIterator>
 	inline void Destroy(ForwardIterator first, ForwardIterator last) {
-		typedef typename iterator_traits<ForwardIterator>::value_type Value_type;
-		typedef typename is_scalar<Value_type>::type	Has_trivial_destructor;
+		typedef typename iterator_traits<ForwardIterator>::value_type	Value_type;
+		typedef typename is_scalar<Value_type>::type				 	Has_trivial_destructor;
 		ft::destroy_aux(first, last, Has_trivial_destructor());
 	}
 
-	template<class Tp> class allocator;
+	template<class T> class allocator;
 
 	template<class ForwardIterator, typename Allocator>
 	void Destroy(ForwardIterator first, ForwardIterator last, Allocator alloc) {
@@ -45,8 +45,8 @@ namespace ft {
 			alloc.destroy(&*first);
 	}
 
-	template<class ForwardIterator, typename Tp>
-	inline void Destroy(ForwardIterator first, ForwardIterator last, allocator<Tp>) {
+	template<class ForwardIterator, typename T>
+	inline void Destroy(ForwardIterator first, ForwardIterator last, allocator<T>) {
 		Destroy(first, last);
 	}
 }
