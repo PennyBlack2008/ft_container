@@ -133,7 +133,7 @@ namespace ft {
                 typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type * = 0)
           : Base(a) {
   				  typedef typename ft::iterator_traits<InputIterator>::iterator_category	IterCategory;
-  				  _M_range_initialize(first, last, IterCategory());
+  				  M_range_initialize(first, last, IterCategory());
         }
 
         ~vector() {
