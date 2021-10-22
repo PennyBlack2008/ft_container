@@ -25,37 +25,9 @@ namespace ft {
 		}
 	};
 
-	/*----
-	remove
-	----*/
+	// __is_integral 이미 존재하고 있음.
 	template<typename T>
-	struct remove_volatile {
-		typedef T type;
-	};
-
-	template<typename T>
-	struct remove_volatile<volatile T> {
-		typedef T type;
-	};
-
-	template<typename T>
-	struct remove_const {
-		typedef T type;
-	};
-
-	template<typename T>
-	struct remove_const<const T> {
-		typedef T type;
-	};
-
-	template<typename T>
-	struct remove_cv {
-		typedef typename remove_volatile<typename remove_const<T>::type>::type type;
-	};
-
-	// is_integral 이미 존재하고 있음.
-	template<typename T>
-	struct is_integral : integral_constant<bool, is_integral(T)> { };
+	struct is_integral : integral_constant<bool, __is_integral(T)> { };
 }
 
 #endif

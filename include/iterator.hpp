@@ -60,15 +60,6 @@ namespace ft {
 			typedef random_access_iterator_tag	iterator_category;
 		};
 
-	template <class T>
-    struct iterator_traits<const T*> {
-      typedef ptrdiff_t					difference_type;
-  		typedef T							value_type;
-  		typedef const T*					pointer;
-  		typedef const T&					reference;
-  		typedef random_access_iterator_tag	iterator_category;
-    };
-
 	template <class InputIterator>
 	void __advance(InputIterator& i, typename iterator_traits<InputIterator>::difference_type n, input_iterator_tag) {
 		for (;n>0;--n)
@@ -117,137 +108,12 @@ namespace ft {
 			return __distance(first, last, typename iterator_traits<InputIterator>::iterator_category());
 		}
 
-	/*-----------------------------------------------------------
-	back_inserter
-	usage: push_back 함수를 포함하고 있는 vector, deque, list에서 사용. 항상 컨테이너로 초기화해야함
-	description: 반복기 어댑터는 요소를 덮어쓰는 것이 아니라, 시퀀스 끝 부분에 요소를 삽입
-	link: https://docs.microsoft.com/ko-kr/cpp/standard-library/back-insert-iterator-class?view=msvc-160
-	------------------------------------------------------------*/
-	template <class Container>
-		class back_insert_iterator :
-			public Iterator<output_iterator_tag, void, void, void, void>
-		{
-			protected:
-				/* back_insert_iterator가 뒤에 요소를 삽입할 컨테이너의 형식입니다. */
-				Container* container;
-			public:
-				/* back_insert_iterator에 대한 컨테이너를 제공하는 형식입니다. */
-				typedef Container container_type;
-				/* @back_insert_iterator 컨테이너의 마지막 요소 다음에 요소를 삽입합니다. */
-				explicit back_insert_iterator (Container& x) : container(&x) { }
-				/* @&operator= 컨테이너의 백 엔드에 값을 추가하거나 푸시합니다. */
-				back_insert_iterator<Container>& operator= (typename Container::const_reference value) {
-					container->push_back(value);
-					return *this;
-				}
-				/* @&operator* 출력 반복기 식 i x를 구현하는 데 사용되는 Dereferencing 연산자 */
-				back_insert_iterator<Container>& operator* () {
-					return *this;
-				}
-				/* @&operator++ 값을 저장할 다음 위치에 back_insert_iterator를 증가 */
-				back_insert_iterator<Container>& operator++ () {
-					return *this;
-				}
-				/* @operator++ 값을 저장할 다음 위치에 back_insert_iterator를 증가 */
-				back_insert_iterator<Container> operator++ (int) {
-					return *this;
-				}
-		};
-
-	template <class Container>
-		back_insert_iterator<Container> back_inserter(Container& x) {
-			return back_insert_iterator<Container>(x);
-		}
-
-	/*----------------------------------------------------
-	front_inserter
-	usage: push_front가 있는 deque, list에서 사용, 항상 컨테이너를 사용하여 초기화해야함
-	description: 요소를 덮어쓰는 것이 아니라, 시퀀스 앞 부분에 요소를 삽입
-	link: https://docs.microsoft.com/ko-kr/cpp/standard-library/front-insert-iterator-class?view=msvc-160
-	-----------------------------------------------------*/
-
-	template <class Container>
-		class front_insert_iterator:
-			public Iterator<output_iterator_tag, void, void, void, void>
-		{
-		protected:
-			/* front_inser_iterator가 앞에 요소를 삽입할 컨테이너의 형식입니다. */
-			Container* container;
-		public:
-			/* @container_type 전면 삽입 대상인 컨테이너를 나타내는 형식입니다. */
-			typedef Container container_type;
-			/* @front_insert_iterator 지정된 컨테이너 개체 앞에 요소를 삽입할 수 있는 반복기를 만듭니다. */
-			explicit front_insert_iterator(Container& x) : container(&x) { }
-			/* @&operator= 컨테이너의 앞에 값을 추가(푸시)합니다. */
-			front_insert_iterator<Container>& operator= (typename Container::const_reference value) {
-				container->push_front(value);
-				return *this;
-			}
-			/* @&operator* 주소가 지정된 요소를 반환하는 삽입 반복기를 역참조합니다. */
-			front_insert_iterator<Container>& operator* () {
-				return *this;
-			}
-			/* @&operator++ 값을 저장할 다음 위치에 back_insert_iterator를 증가시킵니다. */
-			front_insert_iterator<Container>& operator++ () {
-				return *this;
-			}
-			/* @operator++ 값을 저장할 다음 위치에 back_insert_iterator를 증가시킵니다. */
-			front_insert_iterator<Container> operator++ (int) {
-				return *this;
-			}
-		};
-
-	template <class Container>
-		front_insert_iterator<Container> front_inserter(Container& x) {
-			return front_insert_iterator<Container>(x);
-		}
-
-	/*--------------
-	insert_iterator
-	---------------*/
-	template <class Container>
-		class insert_iterator :
-			public Iterator<output_iterator_tag, void, void, void, void>
-		{
-		protected:
-			Container* container;
-			typename Container::iterator iter;
-		public:
-			/* @container_type 일반 삽입 대상인 컨테이너를 나타내는 형식입니다. */
-			typedef Container container_type;
-			/* @insert_iterator 컨테이너의 지정된 위치에 요소를 삽입하는 insert_iterator를 만듭니다. */
-			explicit insert_iterator(Container& x, typename Container::iterator i) : container(&x), iter(i) {}
-			/* @operator= 컨테이너에 값을 삽입하고 새 요소를 가리키도록 업데이트된 반복기를 반환합니다. */
-			insert_iterator<Container>& operator= (typename Container::const_reference value) {
-				iter = container->insert(iter, value);
-				++iter;
-				return *this;
-			}
-			/* @&opertator* 주소가 지정된 요소를 반환하는 삽입 반복기를 역참조합니다. */
-			insert_iterator<Container>& operator* () {
-				return *this;
-			}
-			/* @&operator++ 값을 저장할 다음 위치에 insert_iterator를 증가시킵니다. */
-			insert_iterator<Container>& operator++ () {
-				return *this;
-			}
-			/* @&operator++ (int) 값을 저장할 다음 위치에 insert_iterator를 증가시킵니다. */
-			insert_iterator<Container>& operator++ (int) {
-				return *this;
-			}
-		};
-
-	template <class Container, class Iterator>
-		inline insert_iterator<Container> inserter(Container& x, Iterator i) {
-			return insert_iterator<Container>(x, typename Container::iterator(i));
-		}
-
 	/*---------------
 	reverse_iterator
 	---------------*/
 	template <class Iterator>
 		class reverse_iterator :
-			public Iterator<typename iterator_traits<Iterator>::iterator_category,
+			public ft::Iterator<typename iterator_traits<Iterator>::iterator_category,
         							typename iterator_traits<Iterator>::value_type,
         							typename iterator_traits<Iterator>::difference_type,
         							typename iterator_traits<Iterator>::pointer,

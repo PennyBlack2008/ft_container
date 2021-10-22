@@ -2,10 +2,10 @@
 #define _VECTOR_HPP_
 
 #include <memory>
-#include "../include/iterator.hpp"
-#include "../include/uninitialized.hpp"
-#include "../include/functexcept.hpp"
-#include "../include/algorithm.hpp"
+#include "./include/iterator.hpp"
+#include "./include/uninitialized.hpp"
+#include "./include/functexcept.hpp"
+#include "./include/algorithm.hpp"
 
 namespace ft {
     /*-----------
@@ -13,7 +13,7 @@ namespace ft {
      reference: https://www.fatalerrors.org/a/vector-source-code-analysis.html
     ------------*/
     template<typename T, typename Alloc>
-    struct Vector_Base {
+    struct Vector_base {
         typedef typename Alloc::template rebind<T>::other T_alloc_type;
         typedef typename	Alloc::pointer	            		pointer;
 		    typedef typename	Alloc::const_pointer	          const_pointer;
@@ -123,7 +123,7 @@ namespace ft {
         }
         /* x벡터의 복사본을 지정합니다. */
         vector(const vector& x) : Base(x.size(), x.M_get_T_allocator()) {
-            this->M_impl.M_finish = std::uninitialized_copy_a(x.begin(), x.end(),
+            this->M_impl.M_finish = ft::uninitialized_copy_a(x.begin(), x.end(),
                                             this->M_impl.M_start);
         }
 
@@ -276,7 +276,7 @@ namespace ft {
           M_fill_assign(n, val);
         }
 
-  			template<typename _InputIterator>
+  			template<typename InputIterator>
     			void assign(InputIterator first, InputIterator last,
     			    typename ft::enable_if<!ft::is_integral<InputIterator>::value, InputIterator>::type * = 0) {
     				typedef typename ft::iterator_traits<InputIterator>::iterator_category IterCategory;
@@ -426,7 +426,7 @@ namespace ft {
             this->M_impl.M_end_of_storage = this->M_impl.M_start + xlen;
           }
           else if (size() >= xlen) {
-            ft::Destroy(std::copy(x.begin(), x.end(), begin()), end(), M_get_T_allcator());
+            ft::Destroy(std::copy(x.begin(), x.end(), begin()), end(), M_get_T_allocator());
           }
           else {
             std::copy(x.M_impl.M_start, x.M_impl._M_start + size(), this->M_impl._M_start);
@@ -508,7 +508,7 @@ namespace ft {
 
     template<typename T, typename Alloc>
     template<typename ForwardIterator>
-    void vector<T, Alloc>::M_assign(ForwardIterator frist, ForwardIterator last, forward_iterator_tag) {
+    void vector<T, Alloc>::M_assign(ForwardIterator first, ForwardIterator last, forward_iterator_tag) {
       const size_type len = std::distance(first, last);
       if (len > capacity()) {
         pointer tmp(M_allocate_and_copy(len, first, last));
@@ -546,7 +546,7 @@ namespace ft {
           const size_type elems_after = end() - position;
           pointer old_finish(this->M_impl.M_finish);
           if (elems_after > n) {
-            ft::uninitialied_copy_a(this->M_impl.M_finish - n, this->M_impl.M_finish, this->M_impl.M_finish, M_get_T_allocator());
+            ft::uninitialized_copy_a(this->M_impl.M_finish - n, this->M_impl.M_finish, this->M_impl.M_finish, M_get_T_allocator());
             this->M_impl.M_finish += n;
             std::copy_backward(position.base(), old_finish - n, old_finish);
             std::copy(first, last, position);
@@ -554,7 +554,7 @@ namespace ft {
           else {
             ForwardIterator mid = first;
             std::advance(mid, elems_after);
-            ft::uninitialized_copy_a(mid, last, this->M_impl.M_finish, M_get_T_allcator());
+            ft::uninitialized_copy_a(mid, last, this->M_impl.M_finish, M_get_T_allocator());
             this->M_impl.M_finish += n - elems_after;
             ft::uninitialized_copy_a(position.base(), old_finish, this->M_impl.M_finish, M_get_T_allocator());
             this->M_impl.M_finish += elems_after;
@@ -578,12 +578,12 @@ namespace ft {
   					new_finish = ft::uninitialized_copy_a(position.base(), this->M_impl.M_finish, new_finish, M_get_T_allocator());
   				}
   				catch(...) {
-  					ft::Destroy(new_start, new_finish, M_get_Tp_allocator());
+  					ft::Destroy(new_start, new_finish, M_get_T_allocator());
   					M_deallocate(new_start, len);
   					throw;
   				}
-  				ft::_Destroy(this->M_impl.M_start, this->M_impl.M_finish,
-  						M_get_Tp_allocator());
+  				ft::Destroy(this->M_impl.M_start, this->M_impl.M_finish,
+  						M_get_T_allocator());
   				M_deallocate(this->M_impl.M_start,
   						this->M_impl.M_end_of_storage
   						- this->M_impl.M_start);
@@ -602,15 +602,15 @@ namespace ft {
 				const size_type elems_after = end() - position;
 				pointer old_finish(this->M_impl.M_finish);
 				if (elems_after > n) {
-					ft::uninitialized_copy_a(this->M_impl.M_finish - n, this->M_impl.M_finish, this->M_impl.M_finish, M_get_Tp_allocator());
+					ft::uninitialized_copy_a(this->M_impl.M_finish - n, this->M_impl.M_finish, this->M_impl.M_finish, M_get_T_allocator());
 					this->M_impl.M_finish += n;
 					std::copy_backward(position.base(), old_finish - n, old_finish);
 					std::fill(position.base(), position.base() + n, x_copy);
 				}
 				else {
-					ft::uninitialized_fill_n_a(this->M_impl.M_finish, n - elems_after, x_copy, M_get_Tp_allocator());
+					ft::uninitialized_fill_n_a(this->M_impl.M_finish, n - elems_after, x_copy, M_get_T_allocator());
 					this->M_impl.M_finish += n - elems_after;
-					ft::uninitialized_copy_a(position.base(), old_finish, this->M_impl.M_finish, M_get_Tp_allocator());
+					ft::uninitialized_copy_a(position.base(), old_finish, this->M_impl.M_finish, M_get_T_allocator());
 					this->M_impl.M_finish += elems_after;
 					std::fill(position.base(), old_finish, x_copy);
 				}
@@ -628,18 +628,18 @@ namespace ft {
 				pointer new_finish(new_start);
 				try {
 					new_finish =
-						ft::uninitialized_copy_a(this->M_impl.M_start, position.base(), new_start, M_get_Tp_allocator());
-						ft::uninitialized_fill_n_a(new_finish, n, x, M_get_Tp_allocator());
+						ft::uninitialized_copy_a(this->M_impl.M_start, position.base(), new_start, M_get_T_allocator());
+						ft::uninitialized_fill_n_a(new_finish, n, x, M_get_T_allocator());
 						new_finish += n;
 						new_finish =
-						ft::uninitialized_copy_a(position.base(), this->M_impl.M_finish, new_finish, M_get_Tp_allocator());
+						ft::uninitialized_copy_a(position.base(), this->M_impl.M_finish, new_finish, M_get_T_allocator());
 				}
 				catch(...) {
-					ft::Destroy(new_start, new_finish, M_get_Tp_allocator());
+					ft::Destroy(new_start, new_finish, M_get_T_allocator());
 					M_deallocate(new_start, len);
 					throw;
 				}
-				ft::Destroy(this->M_impl.M_start, this->M_impl.M_finish, M_get_Tp_allocator());
+				ft::Destroy(this->M_impl.M_start, this->M_impl.M_finish, M_get_T_allocator());
 				M_deallocate(this->M_impl.M_start, this->M_impl.M_end_of_storage - this->M_impl.M_start);
 				this->M_impl.M_start = new_start;
 				this->M_impl.M_finish = new_finish;
@@ -668,18 +668,18 @@ namespace ft {
     		pointer new_finish(new_start);
     		try {
     			new_finish =
-    			ft::__uninitialized_copy_a(this->M_impl.M_start, position.base(), new_start, M_getT_allocator());
+    			ft::uninitialized_copy_a(this->M_impl.M_start, position.base(), new_start, M_get_T_allocator());
     			this->M_impl.construct(new_finish, x);
     			++new_finish;
     			new_finish =
-    			ft::__uninitialized_copy_a(position.base(), this->M_impl.M_finish, new_finish, M_getT_allocator());
+    			ft::uninitialized_copy_a(position.base(), this->M_impl.M_finish, new_finish, M_get_T_allocator());
     		}
     		catch(...) {
-    			ft::_Destroy(new_start, new_finish, M_getT_allocator());
+    			ft::Destroy(new_start, new_finish, M_get_T_allocator());
     			M_deallocate(new_start, len);
     			throw;
     		}
-    		ft::_Destroy(this->M_impl.M_start, this->M_impl.M_finish, M_getT_allocator());
+    		ft::Destroy(this->M_impl.M_start, this->M_impl.M_finish, M_get_T_allocator());
     		M_deallocate(this->M_impl.M_start, this->M_impl.M_end_of_storage - this->M_impl.M_start);
     		this->M_impl.M_start = new_start;
     		this->M_impl.M_finish = new_finish;
