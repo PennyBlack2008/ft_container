@@ -4,6 +4,15 @@
 
 int main ()
 {
+  std::vector<int> first(2);
+
+  std::cout << "first size is: " << first.size() << std::endl;
+  std::cout << "first is : ";
+  for (std::vector<int>::iterator it = first.begin(); it != first.end(); ++it)
+    std::cout << ' ' << *it;
+  std::cout << '\n';
+
+
   // constructors used in the same order as described above:
 //   std::vector<int> first;                                // empty vector of ints
   std::vector<int> second (4,100);                       // four ints with value 100

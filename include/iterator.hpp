@@ -7,7 +7,7 @@
 #include "../include/cpp_type_traits.hpp"
 
 namespace ft {
-	/*----------- 
+	/*-----------
 	iterator_tags
 	------------*/
 	class input_iterator_tag {};
@@ -16,12 +16,12 @@ namespace ft {
 	class bidirectional_iterator_tag : public forward_iterator_tag {};
 	class random_access_iterator_tag : public bidirectional_iterator_tag {};
 
-	/*------- 
+	/*-------
 	iterator
 	-------*/
 	template <class Category, class T, class Distance = ptrdiff_t,
           class Pointer = T*, class Reference = T&>
-		class iterator {
+		class Iterator {
 		public:
 			typedef T         value_type;
 			typedef Distance  difference_type;
@@ -60,27 +60,43 @@ namespace ft {
 			typedef random_access_iterator_tag	iterator_category;
 		};
 
-	class MyIterator : public iterator<std::input_iterator_tag, int>
-	{
-	public:
-		int* p;
-	public:
-		MyIterator(int* x): p(x) { }
-		//MyIterator(const MyIterator& mit): p(mit.p) {}
-		MyIterator& operator++() { ++p; return *this; }
-		MyIterator operator++(int) { MyIterator tmp(*this); operator++(); return tmp; }
-		bool operator==(const MyIterator& rhs) const { return p==rhs.p; }
-		bool operator!=(const MyIterator& rhs) const { return p!=rhs.p; }
-		int& operator*() { return *p; }
+	template <class T>
+    struct iterator_traits<const T*> {
+      typedef ptrdiff_t					difference_type;
+  		typedef T							value_type;
+  		typedef const T*					pointer;
+  		typedef const T&					reference;
+  		typedef random_access_iterator_tag	iterator_category;
+    };
+
+	template <class InputIterator>
+	void __advance(InputIterator& i, typename iterator_traits<InputIterator>::difference_type n, input_iterator_tag) {
+		for (;n>0;--n)
+			++i;
 	};
 
-	template <class InputIterator, class Distance>
-		void advance(MyIterator& itb, Distance n) {
-			for(; n > 0; --n)
-				itb++;
-		}
+	template<class BidirIterator>
+	void __advance(BidirIterator& i, typename iterator_traits<BidirIterator>::difference_type n, bidirectional_iterator_tag) {
+		if (n >= 0)
+			for (;n>0;--n)
+				++i;
+		else
+			for (;n<0;++n)
+				--i;
+	}
 
-	/*------- 
+	template <class RandIterator>
+	void __advance(RandIterator& i, typename iterator_traits<RandIterator>::difference_type n, random_access_iterator_tag) {
+		i += n;
+	};
+
+	template <class InputIterator>
+	void advance(InputIterator& i, typename iterator_traits<InputIterator>::difference_type n) {
+		// 양방향 반복자가 아닌 케이스가 존재할때를 위해서 n>=0인 조건과 반복자의 타입에 대한 비교가 필요하나 현 서브젝트에선 다 양방향 반복자 이상이라 구현 X
+		__advance(i, n, typename iterator_traits<InputIterator>::iterator_category());
+	}
+
+	/*-------
 	distance
 	-------*/
 	template <class InputIterator>
@@ -100,8 +116,8 @@ namespace ft {
 		typename iterator_traits<InputIterator>::difference_type distance(InputIterator first, InputIterator last) {
 			return __distance(first, last, typename iterator_traits<InputIterator>::iterator_category());
 		}
-	
-	/*----------------------------------------------------------- 
+
+	/*-----------------------------------------------------------
 	back_inserter
 	usage: push_back 함수를 포함하고 있는 vector, deque, list에서 사용. 항상 컨테이너로 초기화해야함
 	description: 반복기 어댑터는 요소를 덮어쓰는 것이 아니라, 시퀀스 끝 부분에 요소를 삽입
@@ -109,7 +125,7 @@ namespace ft {
 	------------------------------------------------------------*/
 	template <class Container>
 		class back_insert_iterator :
-			public iterator<output_iterator_tag, void, void, void, void>
+			public Iterator<output_iterator_tag, void, void, void, void>
 		{
 			protected:
 				/* back_insert_iterator가 뒤에 요소를 삽입할 컨테이너의 형식입니다. */
@@ -152,7 +168,7 @@ namespace ft {
 
 	template <class Container>
 		class front_insert_iterator:
-			public iterator<output_iterator_tag, void, void, void, void>
+			public Iterator<output_iterator_tag, void, void, void, void>
 		{
 		protected:
 			/* front_inser_iterator가 앞에 요소를 삽입할 컨테이너의 형식입니다. */
@@ -191,7 +207,7 @@ namespace ft {
 	---------------*/
 	template <class Container>
 		class insert_iterator :
-			public iterator<output_iterator_tag, void, void, void, void>
+			public Iterator<output_iterator_tag, void, void, void, void>
 		{
 		protected:
 			Container* container;
@@ -226,50 +242,50 @@ namespace ft {
 			return insert_iterator<Container>(x, typename Container::iterator(i));
 		}
 
-	/*--------------- 
+	/*---------------
 	reverse_iterator
 	---------------*/
 	template <class Iterator>
 		class reverse_iterator :
-			public iterator<typename iterator_traits<Iterator>::iterator_category,
-							typename iterator_traits<Iterator>::value_type,
-							typename iterator_traits<Iterator>::difference_type,
-							typename iterator_traits<Iterator>::pointer,
-							typename iterator_traits<Iterator>::reference>
+			public Iterator<typename iterator_traits<Iterator>::iterator_category,
+        							typename iterator_traits<Iterator>::value_type,
+        							typename iterator_traits<Iterator>::difference_type,
+        							typename iterator_traits<Iterator>::pointer,
+        							typename iterator_traits<Iterator>::reference>
 		{
 		protected:
 			/* current는 해당 컨테이너의 정방향 iterator에서 받은 값 그대로의 base()상태 */
-			Iterator current;
+			Iterator M_current;
 		public:
 			/* @iterator_type reverse_iterator의 기본 반복기를 제공하는 형식 */
-			typedef Iterator												iterator_type;
+			typedef Iterator										                      		iterator_type;
 			/* @difference_type 동일한 컨테이너 안에서 요소를 참조하는 두 reverse_iterator 사이의 차이를 제공하는 형식 */
 			typedef typename iterator_traits<Iterator>::difference_type		difference_type;
 			/* @reference reverse_iterator로 주소를 지정하는 요소에 참조를 제공하는 형식*/
-			typedef typename iterator_traits<Iterator>::reference			reference;
+			typedef typename iterator_traits<Iterator>::reference		    	reference;
 			/* @pointer reverse_iterator로 주소를 지정하는 요소에 포인터를 제공하는 형식 */
-			typedef typename iterator_traits<Iterator>::pointer				pointer;
+			typedef typename iterator_traits<Iterator>::pointer			    	pointer;
 
-			reverse_iterator() : current() {}
-			explicit reverse_iterator(Iterator x) : current(x) {}
-			reverse_iterator(const reverse_iterator& x) : current(x.current) {}
-			template <class Iter>
-			reverse_iterator(const reverse_iterator<Iter>& x) : current(x.base()) {}
+			reverse_iterator() : M_current() {}
+			explicit reverse_iterator(Iterator x) : M_current(x) {}
+			reverse_iterator(const reverse_iterator& x) : M_current(x.M_current) {}
+			template <class Iter> // NOTE: 왜 그냥 Iter일까?
+			reverse_iterator(const reverse_iterator<Iter>& x) : M_current(x.base()) {}
 			template <class Iter>
 			reverse_iterator& operator=(const reverse_iterator<Iter>& x) {
-				current = x.base();
+				M_current = x.base();
 				return *this;
 			}
 			/* @base reverse_iterator에서 기본 반복기를 복구합니다. */
 			iterator_type		base() const {
-				return current;
+				return M_current;
 			}
 			/* @operator* reverse_iterator가 주소를 지정하는 요소를 반환합니다.
 			--를 하는 이유는 reverse_iterator의 until은 정방향 from -1의 위치와 같다
 			(정방향과 다르게 NULL로 시작해서 끝값으로 끝난다) 그 반대로 reverse_iterator의 from은 정방향 until -1의 위치와 같다.
 			*/
 			reference			operator*() const {
-				iterator_type	temp = current;
+				iterator_type	temp = M_current;
 				return *--temp;
 			}
 			/* @operator-> reverse_iterator가 주소 지정하는 요소로 포인터를 반환합니다. */
@@ -278,43 +294,43 @@ namespace ft {
 			}
 			/* @&operator++ reverse_iterator를 이전 요소로 증가시킵니다. */
 			reverse_iterator&	operator++() {
-				--current;
+				--M_current;
 				return *this;
 			}
 			/* @operator++ reverse_iterator를 이전 요소로 증가시킵니다. */
 			reverse_iterator	operator++(int) {
 				reverse_iterator	temp(*this);
-				--current;
+				--M_current;
 				return temp;
 			}
 			/* @&operator-- reverse_iterator를 이전 요소로 감소시킵니다. */
 			reverse_iterator&	operator--() {
-				++current;
+				++M_current;
 				return *this;
 			}
 			/* @operator-- reverse_iterator를 이전 요소로 감소시킵니다. */
 			reverse_iterator	operator--(int) {
 				reverse_iterator	temp(*this);
-				++current;
+				++M_current;
 				return temp;
 			}
 			/* @operator+ 반복기에 오프셋을 추가하고 새 오프셋 위치에서 삽입된 요소를 주소 지정하는 새 reverse_iterator
 							를 반환합니다.*/
 			reverse_iterator	operator+ (difference_type n) const {
-				return reverse_iterator(current - n);
+				return reverse_iterator(M_current - n);
 			}
 			/* @opreator+= reverse_iterator에서 지정된 오프셋을 추가합니다. */
 			reverse_iterator&	operator+=(difference_type n) {
-				current -= n;
+				M_current -= n;
 				return *this;
 			}
 			/* @operator- reverse_iterator에서 오프셋을 차감하고 오프셋 위치에서 요소를 주소지정하는 reverse_iterator를 반환 */
 			reverse_iterator	operator- (difference_type n) const {
-				return reverse_iterator(current + n);
+				return reverse_iterator(M_current + n);
 			}
 			/* @operator-= reverse_iterator에서 지정된 오프셋을 차감합니다. */
 			reverse_iterator&	operator-=(difference_type n) {
-				current += n;
+				M_current += n;
 				return *this;
 			}
 			/* @operator[] reverse_iterator에서 주소 지정하는 요소의 요소 오프셋으로 지정된 위치 수 만큼 참조를 반환 */
@@ -415,79 +431,79 @@ namespace ft {
 	}
 
 	using ft::iterator_traits;
-	using ft::iterator;
+	using ft::Iterator;
 
 	template <class Iterator, class Container>
 	class normal_iterator {
 		protected:
-			Iterator	current;
+			Iterator	M_current;
 		public:
-			typedef typename iterator_traits<Iterator>::iterator_category	iterator_category;
-			typedef typename iterator_traits<Iterator>::value_type			value_type;
+			typedef typename iterator_traits<Iterator>::iterator_category iterator_category;
+			typedef typename iterator_traits<Iterator>::value_type			  value_type;
 			typedef typename iterator_traits<Iterator>::difference_type		difference_type;
-			typedef typename iterator_traits<Iterator>::reference			reference;
-			typedef typename iterator_traits<Iterator>::pointer				pointer;
+			typedef typename iterator_traits<Iterator>::reference		    	reference;
+			typedef typename iterator_traits<Iterator>::pointer			    	pointer;
 
-			normal_iterator() : current(Iterator()) { }
-			explicit normal_iterator(const Iterator& i) : current(i) { }
+			normal_iterator() : M_current(Iterator()) { }
+			explicit normal_iterator(const Iterator& i) : M_current(i) { }
 
 			// Allow iterator to const_iterator conversion
 			template <class Iter>
 				normal_iterator(const normal_iterator<Iter,
-					typename enable_if<(ft::are_same<Iter, typename Container::pointer>::value),
-					Container>::type>& i)
-				: current(i.base()) { }
+					                typename enable_if<(ft::are_same<Iter, typename Container::pointer>::value),
+					                                      Container>::type>& i)
+				: M_current(i.base()) { }
 
 			reference operator*() const {
-				return *current;
+				return *M_current;
 			}
 
 			pointer operator->() const {
-				return current;
+				return M_current;
 			}
 
 			normal_iterator& operator++() {
-				++current;
+				++M_current;
 				return *this;
 			}
 
 			normal_iterator operator++(int) {
-				return normal_iterator(current++);
+				return normal_iterator(M_current++);
 			}
 
 			normal_iterator& operator--() {
-				--current;
+				--M_current;
 				return *this;
 			}
 
 			normal_iterator& operator--(int) {
-				return normal_iterator(current--);
+				return normal_iterator(M_current--);
 			}
 
 			reference operator[](const difference_type& n) const {
-				return current[n];
+				return M_current[n];
 			}
 
 			normal_iterator& operator+=(const difference_type& n) {
-				current += n;
+				M_current += n;
 				return *this;
 			}
 
 			normal_iterator& operator+(const difference_type& n) const {
-				return normal_iterator(current + n);
+				return normal_iterator(M_current + n);
 			}
 
 			normal_iterator& operator-=(const difference_type& n) {
-				current -= n;
+				M_current -= n;
 				return *this;
 			}
 
 			normal_iterator operator-(const difference_type& n) const {
-				return normal_iterator(current - n);
+				return normal_iterator(M_current - n);
 			}
 
 			const Iterator& base() const {
-				return current;
+				return M_current;
 			}
 	};
 
