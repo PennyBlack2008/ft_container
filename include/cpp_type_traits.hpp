@@ -1,3 +1,12 @@
+/**
+ * 템플릿 메타 프로그래밍
+ * 컴파일 시간에 연산을 수행한다.
+ * https://sungbeom.github.io/2020/01/05/EffectiveCpp7-8.html
+ * 
+ * 여기서 enum은 값을 계산하는 용도로 사용되는 데, TMP에서 이것을 '나열자 둔갑술(enum hack)'라고 한다.
+ * value 변수는 현재 계산된 계승 값을 담는 역할을 맡습니다.
+ **/
+
 #ifndef _CPP_TYPE_TRAITS_HPP_
 #define _CPP_TYPE_TRAITS_HPP_
 
@@ -8,9 +17,9 @@ namespace ft {
 		typedef char	one;
 		typedef char	two[2];
 
-		template<typename Tp>
-		one	test_type(int Tp::*);
-		template<typename Tp>
+		template<typename T>
+		one	test_type(int T::*);
+		template<typename T>
 		two&	test_type(...);
 	}
 
@@ -33,9 +42,9 @@ namespace ft {
 		typedef true_type type;
 	};
 
-	template<class Sp, class Tp>
+	template<class S, class T>
 	struct traitor {
-		enum { value = bool(Sp::value) || bool(Tp::value) };
+		enum { value = bool(S::value) || bool(T::value) };
 		typedef typename truth_type<value>::type type;
 	};
 
@@ -46,8 +55,8 @@ namespace ft {
 		typedef false_type type;
 	};
 
-	template<typename Tp>
-	struct are_same<Tp, Tp> {
+	template<typename T> 
+	struct are_same<T, T> {
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -56,7 +65,7 @@ namespace ft {
 	is_void
 	-------*/
 	// Holds if the template-argument is a void type.
-	template<typename Tp>
+	template<typename T>
 	struct is_void {
 		enum { value = 0 };
 		typedef false_type type;
@@ -71,7 +80,7 @@ namespace ft {
 	/*----------
 	is_integer
 	----------*/
-	template<class Tp>
+	template<class T>
 	struct is_integer {
 		enum { value = 0 };
 		typedef false_type type;
@@ -83,6 +92,10 @@ namespace ft {
 		typedef true_type type;
 	};
 
+	/**
+	 * 예시로 is_integer<'c'>::value == 1이 되고,
+	 * 		is_integer<'c'>::type == true_type가 된다.
+	 **/
 	template<>
 	struct is_integer<char> {
 		enum { value = 1 };
@@ -152,7 +165,7 @@ namespace ft {
 	/*-----------
 	is_floating
 	-----------*/
-	template<typename Tp>
+	template<typename T>
 	struct is_floating {
 		enum { value = 0 };
 		typedef false_type type;
@@ -179,14 +192,14 @@ namespace ft {
 	/*----------
 	is_pointer
 	----------*/
-	template<typename Tp>
+	template<typename T>
 	struct is_pointer {
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
-	template<typename Tp>
-	struct is_pointer<Tp*> {
+	template<typename T>
+	struct is_pointer<T*> {
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -194,7 +207,7 @@ namespace ft {
 	/*------------------
 	Normal iterator type
 	------------------*/
-	template<typename Tp>
+	template<typename T>
 	struct is_normal_iterator {
 		enum { value = 0 };
 		typedef false_type type;
@@ -209,35 +222,35 @@ namespace ft {
 	/*-------------
 	is_arithmetic
 	-------------*/
-	template<typename Tp>
-	struct is_arithmetic : public traitor<is_integer<Tp>, is_floating<Tp> > { };
+	template<typename T>
+	struct is_arithmetic : public traitor<is_integer<T>, is_floating<T> > { };
 
 	/*--------------
 	is_fundamental
 	--------------*/
-	template<typename Tp>
-	struct is_fundamental : public traitor<is_void<Tp>, is_pointer<Tp> > { };
+	template<typename T>
+	struct is_fundamental : public traitor<is_void<T>, is_pointer<T> > { };
 
 	/*---------
 	is_scalar
 	---------*/
 	// A scalar type is an arithmetic type or a pointer type
-	template<typename Tp>
-	struct is_scalar : public traitor<is_arithmetic<Tp>, is_pointer<Tp> > { };
+	template<typename T>
+	struct is_scalar : public traitor<is_arithmetic<T>, is_pointer<T> > { };
 
 	/*----
 	is_pod
 	----*/
 	// For the immediate use, the following is a good approximation.
-	template<typename Tp>
+	template<typename T>
 	struct is_pod {
-		enum { value = (sizeof(detail::test_type<Tp>(0)) != sizeof(detail::one)) };
+		enum { value = (sizeof(detail::test_type<T>(0)) != sizeof(detail::one)) };
 	};
 
 	/*--------
 	is_empty
 	--------*/
-	template<typename Tp>
+	template<typename T>
 	struct is_empty {
 		private:
 			template<typename>
@@ -245,13 +258,13 @@ namespace ft {
 			template<typename Up>
 			struct second : public Up { };
 		public:
-			enum { value = sizeof(first<Tp>) == sizeof(second<Tp>) };
+			enum { value = sizeof(first<T>) == sizeof(second<T>) };
 	};
 	/*-------
 	is_char
 	-------*/
 	//For use in std::copy and std::find overloads for streambuf iterators.
-	template<typename Tp>
+	template<typename T>
 	struct is_char {
 		enum { value = 0 };
 		typedef false_type type;
@@ -262,5 +275,13 @@ namespace ft {
 		enum { value = 1 };
 		typedef true_type type;
 	};
+
+	/*---------
+	conditional
+	---------*/
+	template <bool B, class If, class Then>
+	struct conditional { typedef If type; };
+	template <class If, class Then>
+	struct conditional<false, If, Then> { typedef Then type; };
 }
 #endif

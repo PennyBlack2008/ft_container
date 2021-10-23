@@ -9,9 +9,9 @@ namespace ft {
 	/*--
 	swap
 	--*/
-	template<typename Tp>
-	inline void swap(Tp& a, Tp& b) {
-		Tp tmp = a;
+	template<typename T>
+	inline void swap(T& a, T& b) {
+		T tmp = a;
 		a = b;
 		b = tmp;
 	}
@@ -58,7 +58,7 @@ namespace ft {
 	{
 		typedef typename iterator_traits<InputIterator1>::value_type	v1;
 		typedef typename iterator_traits<InputIterator2>::value_type	v2;
-		return equal(first1, last1, first2, equal_to<v1, v2>());
+		return ft::equal(first1, last1, first2, equal_to<v1, v2>());
 	}
 
 	/*---------------------
@@ -113,90 +113,6 @@ namespace ft {
 					(const unsigned char*) first2,
 					(const unsigned char*) last2);
 		#endif
-	}
-
-	template<bool, typename>
-	struct __copy {
-		template<typename II, typename OI>
-		static OI copy(II first, II last, OI result) {
-			for(; first != last; ++result, ++first)
-				*result = *first;
-			return result;
-		}
-	};
-
-	template<bool BoolType>
-	struct __copy<BoolType, random_access_iterator_tag> {
-		template<typename II, typename OI>
-		static OI copy(II first, II last, OI result) {
-			typedef typename iterator_traits<II>::difference_type	Distance;
-			for(Distance n = last - first; n > 0; --n) {
-				*result = *first;
-				++first;
-				++result;
-			}
-			return result;
-		}
-	};
-	
-	template<>
-	struct __copy<true, random_access_iterator_tag> {
-		template<typename Tp>
-		static Tp* copy(const Tp* first, const Tp* last, Tp* result) {
-			std::memmove(result, first, sizeof(Tp) * (last - first));
-			return result + (last - first);
-		}
-	};
-
-	template<typename II, typename OI>
-	inline OI copy_aux(II first, II last, OI result) {
-		typedef typename iterator_traits<II>::value_type			ValueTypeI;
-		typedef typename iterator_traits<OI>::value_type			ValueTypeO;
-		typedef typename iterator_traits<II>::iterator_category	Category;
-		const bool simple = (is_scalar<ValueTypeI>::value
-									&& is_pointer<II>::value
-									&& is_pointer<OI>::value
-									&& are_same<ValueTypeI, ValueTypeO>::value);
-		return ft::__copy<simple, Category>::copy(first, last, result);
-	}
-
-	template<bool, bool>
-	struct copy_normal {
-		template<typename II, typename OI>
-		static OI copy_n(II first, II last, OI result) {
-			return copy_aux(first, last, result);
-		}
-	};
-	
-	template<>
-	struct copy_normal<true, false> {
-		template<typename II, typename OI>
-		static OI copy_n(II first, II last, OI result) {
-			return copy_aux(first.base(), last.base(), result);
-		}
-	};
-
-	template<>
-	struct copy_normal<false, true> {
-		template<typename II, typename OI>
-		static OI copy_n(II first, II last, OI result) {
-			return OI(copy_aux(first, last, result.base()));
-		}
-	};
-
-	template<>
-	struct copy_normal<true, true> {
-		template<typename II, typename OI>
-		static OI copy_n(II first, II last, OI result) {
-			return OI(copy_aux(first.base(), last.base(), result.base()));
-		}
-	};
-
-	template<typename InputIterator, typename OutputIterator>
-	inline OutputIterator copy(InputIterator first, InputIterator last, OutputIterator result) {
-		const bool in = ft::is_normal_iterator<InputIterator>::value;
-		const bool out = ft::is_normal_iterator<OutputIterator>::value;
-		return copy_normal<in, out>::copy_n(first, last, result);
 	}
 }
 

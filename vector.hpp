@@ -339,7 +339,7 @@ namespace ft {
 
         iterator erase(iterator first, iterator last) {
           if (last != end())
-  					ft::copy(last, end(), first);
+  					std::copy(last, end(), first);
   				M_erase_at_end(first.base() + (end() - last));
   				return first;
         }
@@ -375,34 +375,34 @@ namespace ft {
         }
 
       template <typename InputIterator>
-        void M_range_initialize(InputIterator first, InputIterator last, input_iterator_tag)
+        void M_range_initialize(InputIterator first, InputIterator last, std::input_iterator_tag)
         {
           for (; first != last; ++first)
             push_back(*first);
         }
 
       template <typename ForwardIterator>
-        void M_range_initialize(ForwardIterator first, ForwardIterator last, forward_iterator_tag)
+        void M_range_initialize(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
         {
           size_type n = distance(first, last);
-          this->M_start = this->M_allocate(n);
-          this->M_end_of_storage = this->M_start + n;
-          this->M_finish = uninitialized_copy(first, last, this->M_start);
+          this->M_impl.M_start = this->M_allocate(n);
+          this->M_impl.M_end_of_storage = this->M_impl.M_start + n;
+          this->M_impl.M_finish = uninitialized_copy(first, last, this->M_impl.M_start);
         }
 
       template<typename InputIterator>
-        void M_assign(InputIterator first, InputIterator last, input_iterator_tag);
+        void M_assign(InputIterator first, InputIterator last, std::input_iterator_tag);
 
       template<typename ForwardIterator>
-        void M_assign(ForwardIterator first, ForwardIterator last, forward_iterator_tag);
+        void M_assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag);
 
       void M_fill_assign(size_type n, const value_type& val);
 
       template<typename InputIterator>
-        void M_range_insert(iterator pos, InputIterator first, InputIterator last, input_iterator_tag);
+        void M_range_insert(iterator pos, InputIterator first, InputIterator last, std::input_iterator_tag);
 
       template<typename ForwardIterator>
-        void M_range_insert(iterator pos, ForwardIterator first, ForwardIterator last, forward_iterator_tag);
+        void M_range_insert(iterator pos, ForwardIterator first, ForwardIterator last, std::forward_iterator_tag);
 
       void M_fill_insert(iterator pos, size_type n, const value_type& x);
 
@@ -496,7 +496,7 @@ namespace ft {
 
     template<typename T, typename Alloc>
     template<typename InputIterator>
-    void vector<T, Alloc>::M_assign(InputIterator first, InputIterator last, input_iterator_tag) {
+    void vector<T, Alloc>::M_assign(InputIterator first, InputIterator last, std::input_iterator_tag) {
       pointer cur(this->M_impl.M_start);
       for (; first != last && cur != this->M_impl.M_finish; ++cur, ++first)
         *cur = *first;
@@ -508,7 +508,7 @@ namespace ft {
 
     template<typename T, typename Alloc>
     template<typename ForwardIterator>
-    void vector<T, Alloc>::M_assign(ForwardIterator first, ForwardIterator last, forward_iterator_tag) {
+    void vector<T, Alloc>::M_assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag) {
       const size_type len = std::distance(first, last);
       if (len > capacity()) {
         pointer tmp(M_allocate_and_copy(len, first, last));
@@ -530,7 +530,7 @@ namespace ft {
     }
 
     template<typename T, typename Alloc> template<typename InputIterator>
-    void vector<T, Alloc>::M_range_insert(iterator pos, InputIterator first, InputIterator last, input_iterator_tag) {
+    void vector<T, Alloc>::M_range_insert(iterator pos, InputIterator first, InputIterator last, std::input_iterator_tag) {
       for (; first != last; ++first) {
 	  		pos = insert(pos, *first);
 	  		++pos;
@@ -539,7 +539,7 @@ namespace ft {
 
     template<typename T, typename Alloc>
     template<typename ForwardIterator>
-    void vector<T, Alloc>::M_range_insert(iterator position, ForwardIterator first, ForwardIterator last, forward_iterator_tag) {
+    void vector<T, Alloc>::M_range_insert(iterator position, ForwardIterator first, ForwardIterator last, std::forward_iterator_tag) {
       if (first != last) {
         const size_type n = std::distance(first, last);
         if (size_type(this->M_impl.M_end_of_storage - this->M_impl.M_finish) >= n) {

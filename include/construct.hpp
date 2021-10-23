@@ -28,6 +28,8 @@ namespace ft {
 
 	template<class ForwardIterator>
 	inline void destroy_aux(ForwardIterator first, ForwardIterator last, true_type) {
+		(void)first;
+		(void)last;
 	}
 
 	template<class ForwardIterator>
