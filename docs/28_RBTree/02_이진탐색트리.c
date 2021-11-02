@@ -22,7 +22,7 @@ Node* BST_insert(Node* root, int value)
      * */
     if (root == NULL)
     {
-        root = (Node*)malloc(sizeof(Node));
+        root = (Node*)calloc(1,sizeof(Node));
         root->leftChild = root->rightChild = NULL;
         root->value = value;
         return root;
@@ -41,7 +41,7 @@ Node* BST_insert(Node* root, int value)
 }
 
 /** 해당 root 기준에서 가장 작은 노드를 찾는 함수 */
-Node* findMinNode(Node* node)
+Node* findMinNode(Node* root)
 {
     Node* tmp = root;
     while (tmp->leftChild != NULL)
@@ -49,12 +49,12 @@ Node* findMinNode(Node* node)
     return tmp;
 }
 
-/** 삭제의 4가지 단계
- * 1. */
 Node* BST_delete(Node* root, int value)
 {
     Node* tNode = NULL;
-    /** root에 아무것도 없을 정도로 root를 옮겨다녔으면 이제 그만 찾아야지~ */
+    /** root에 아무것도 없을 정도로 root를 옮겨다녔으면 이제 그만 찾아야지~ 
+     * 이 경우 leaf node에 도착했을 때의 경우이다.
+    */
     if (root == NULL)
         return NULL;
 
@@ -65,21 +65,25 @@ Node* BST_delete(Node* root, int value)
         root->rightChild = BST_delete(root->rightChild, value);
     else /** 삭제대상인 key값을 찾긴했는 데, 이제 이 key값의 상태를 확인 후, 조심히 삭제해야한다*/
     {
-        // 자식 노드가 둘 다 있을 경우
+        // 자식 노드가 둘 다 있을 경우 successor node를 찾는다.
         if (root->rightChild != NULL && root->leftChild != NULL)
         {
             // 1. tNode가 successor node이다. 삭제 노드 대신 희생하게 된다.
             tNode = findMinNode(root->rightChild);
+            printf("root->rightChild->value: %d\n", tNode->value);
             // 2. 이 root에 successor node가 갖고 있던 값을 넣는다.
             root->value = tNode->value;
             // 3. successor node를 삭제하기 위해 다시 이 함수를 실행한다.
             root->rightChild = BST_delete(root->rightChild, tNode->value);
         }
-        else
+        else // 자식 노드가 하나일 경우
         {
-            // 4. successor node를 삭제한다.가 되어야할 것같은 데...모르겠다. 예제를 더 찾아봐야겠다.
+            // 1.삭제하고자하는 노드의 부모 노드와 자식 노드를 연결한다.
             tNode = (root->leftChild == NULL) ? root->rightChild : root->leftChild;
-            free(root); 
+            // 2. 삭제하고자하는 노드 삭제
+            free(root);
+            root = NULL;
+            // 3. 함수 종료
             return tNode;
         }
     }
@@ -105,8 +109,10 @@ void BST_print(Node* root)
         return ;
 
     printf("%d ", root->value);
-    BST_print(root->leftChild);
-    BST_print(root->rightChild);
+    if (root->leftChild != NULL)
+        BST_print(root->leftChild);
+    if (root->rightChild != NULL)
+        BST_print(root->rightChild);
 }
 
 int main()
@@ -114,9 +120,8 @@ int main()
     root = BST_insert(root, 5);
     root = BST_insert(root, 3);
     root = BST_insert(root, 7);
-    root = BST_insert(root, 1);
-    root = BST_insert(root, 9);
-    root = BST_insert(root, 6);
+    // root = BST_insert(root, 9);
+    // root = BST_insert(root, 6);
 
     root = BST_delete(root, 5);
 
