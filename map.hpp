@@ -1,24 +1,30 @@
 #ifndef MAP_H
 #define MAP_H 1
 
+#include <functional> // std::less
 #include <memory>
-#include <utility> // std::pair
-// #include <functional> // std::less
-#include "include/stl_function.h" // _Select1st
-#include "tree.h"
+#include "include/utility.hpp" // ft::pair
+#include "include/iterator.hpp"
+#include "tree.hpp"
 
 namespace ft
 {
-  template <typename Key, typename T, typename Compare = less<Key>,
-            typename Alloc = std::allocator<std::pair<const Key, T> > >
+  template <typename Key, typename T, typename Compare = std::less<Key>,
+            typename Alloc = std::allocator<ft::pair<const Key, T> > >
   class map
   {
   public:
     typedef Key                                          key_type;
-    typedef T                                           mapped_type;
-    typedef std::pair<const Key, T>                         value_type;
+    typedef T                                            mapped_type;
+    typedef ft::pair<const Key, T>                      value_type;
     typedef Compare                                      key_compare;
+    typedef Alloc                                        allocator_type;
 
+  private:
+    // concept requirements
+    typedef typename Alloc::value_type                   Alloc_value_type;
+  
+  public:
     class value_compare
       : public std::binary_function<value_type, value_type, bool>
     {
@@ -36,25 +42,29 @@ namespace ft
 
   private:
       /// @if maint  This turns a red-black tree into a [multi]map.  @endif
-      typedef RB_tree<key_type, value_type, _Select1st<value_type>,
+      typedef typename Alloc::template rebind<value_type>::other 
+        Pair_alloc_type;
+
+      /// @if maint  This turns a red-black tree into a [multi]map.  @endif
+      typedef RB_tree<key_type, value_type, map_key<value_type>,
 		                  key_compare, Alloc> Rep_type;
+
       /// @if maint  The actual tree structure.  @endif
       Rep_type M_t;
 
   public:
     // many of these are specified differently in ISO, but the following are
     // "functionally equivalent"
-    typedef typename Alloc::pointer                   pointer;
-    typedef typename Alloc::const_pointer             const_pointer;
-    typedef typename Alloc::reference                 reference;
-    typedef typename Alloc::const_reference           const_reference;
-    typedef typename Rep_type::allocator_type         allocator_type;
-    typedef typename Rep_type::iterator               iterator;
-    typedef typename Rep_type::const_iterator         const_iterator;
-    typedef typename Rep_type::size_type              size_type;
-    typedef typename Rep_type::difference_type        difference_type;
-    typedef typename Rep_type::reverse_iterator       reverse_iterator;
-    typedef typename Rep_type::const_reverse_iterator const_reverse_iterator;
+    typedef typename Pair_alloc_type::pointer              pointer;
+    typedef typename Pair_alloc_type::const_pointer        const_pointer;
+    typedef typename Pair_alloc_type::reference            reference;
+    typedef typename Pair_alloc_type::const_reference      const_reference;
+    typedef typename Rep_type::iterator                    iterator;
+    typedef typename Rep_type::const_iterator              const_iterator;
+    typedef typename Rep_type::size_type                   size_type;
+    typedef typename Rep_type::difference_type             difference_type;
+    typedef typename Rep_type::reverse_iterator            reverse_iterator;
+    typedef typename Rep_type::const_reverse_iterator      const_reverse_iterator;
 
     // [23.3.1.1] construct/copy/destroy
     // (get_allocator() is normally listed in this section, but seems to have
@@ -63,15 +73,7 @@ namespace ft
      *  @brief  Default constructor creates no elements.
      */
     map()
-    : M_t(Compare(), allocator_type()) { }
-
-    // for some reason this was made a separate function
-    /**
-     *  @brief  Default constructor creates no elements.
-     */
-    explicit
-    map(const Compare& comp, const allocator_type& a = allocator_type())
-    : M_t(comp, a) { }
+    : M_t() { }
 
     /**
      *  @brief  Map copy constructor.
@@ -82,6 +84,31 @@ namespace ft
      */
     map(const map& x)
     : M_t(x.M_t) { }
+    
+    // for some reason this was made a separate function
+    /**
+     *  @brief  Default constructor creates no elements.
+     */
+    explicit
+    map(const Compare& comp, const allocator_type& a = allocator_type())
+    : M_t(comp, a) { }
+
+
+    /**
+     *  @brief  Builds a %map from a range.
+     *  @param  first  An input iterator.
+     *  @param  last  An input iterator.
+     *
+     *  Create a %map consisting of copies of the elements from [first,last).
+     *  This is linear in N if the range is already sorted, and NlogN
+     *  otherwise (where N is distance(first,last)).
+     */
+    template <typename InputIterator>
+    map(InputIterator first, InputIterator last)
+    // LLVM LOCAL begin mainline 129013
+    : M_t()
+    // LLVM LOCAL end mainline 129013
+    { M_t.M_insert_unique(first, last); }
 
     /**
      *  @brief  Builds a %map from a range.
@@ -98,9 +125,10 @@ namespace ft
     map(InputIterator first, InputIterator last,
         const Compare& comp, const allocator_type& a = allocator_type())
     : M_t(comp, a)
-    { M_t.insert_unique(first, last); }
+    { M_t.M_insert_unique(first, last); }
 
-     /**
+
+    /**
      *  @brief  Map assignment operator.
      *  @param  x  A %map of identical element and allocator types.
      *
@@ -109,10 +137,10 @@ namespace ft
      */
     map&
       operator=(const map& x)
-      {
-        M_t = x.M_t;
-        return *this;
-      }
+    {
+      M_t = x.M_t;
+      return *this;
+    }
 
     /// Get a copy of the memory allocation object.
     allocator_type
@@ -232,9 +260,37 @@ namespace ft
     	return (*i).second;
     }
 
+    // _GLIBCXX_RESOLVE_LIB_DEFECTS
+      // DR 464. Suggestion for new member functions in standard containers.
+      /**
+       *  @brief  Access to %map data.
+       *  @param  k  The key for which data should be retrieved.
+       *  @return  A reference to the data whose key is equivalent to @a k, if
+       *           such a data is present in the %map.
+       *  @throw  std::out_of_range  If no such data is present.
+       */
+      mapped_type&
+      at(const key_type& k)
+      {
+        iterator i = lower_bound(k);
+        if (i == end() || key_comp()(k, (*i).first))
+          std::__throw_out_of_range("map::at");
+        return (*i).second;
+      }
+
+      const mapped_type&
+      at(const key_type& k) const
+      {
+        const_iterator i = lower_bound(k);
+        if (i == end() || key_comp()(k, (*i).first))
+          std::__throw_out_of_range("map::at");
+        return (*i).second;
+      }
+
+
     // modifiers
     /**
-     *  @brief Attempts to insert a std::pair into the %map.
+     *  @brief Attempts to insert a ft::pair into the %map.
      *  @param  x  Pair to be inserted (see std::make_pair for easy creation of
      *             pairs).
      *  @return  A pair, of which the first element is an iterator that points
@@ -247,12 +303,12 @@ namespace ft
      *
      *  Insertion requires logarithmic time.
      */
-    std::pair<iterator,bool>
+    ft::pair<iterator,bool>
       insert(const value_type& x)
-    { return M_t.insert_unique(x); }
+    { return M_t.M_insert_unique(x); }
 
     /**
-     *  @brief Attempts to insert a std::pair into the %map.
+     *  @brief Attempts to insert a ft::pair into the %map.
      *  @param  position  An iterator that serves as a hint as to where the
      *                    pair should be inserted.
      *  @param  x  Pair to be inserted (see std::make_pair for easy creation of
@@ -481,7 +537,7 @@ namespace ft
      *
      *  This function probably only makes sense for multimaps.
      */
-    std::pair<iterator,iterator>
+    ft::pair<iterator,iterator>
       equal_range(const key_type& x)
     { return M_t.equal_range(x); }
 
@@ -500,7 +556,7 @@ namespace ft
      *
      *  This function probably only makes sense for multimaps.
      */
-    std::pair<const_iterator,const_iterator>
+    ft::pair<const_iterator,const_iterator>
       equal_range(const key_type& x) const
     { return M_t.equal_range(x); }
 
