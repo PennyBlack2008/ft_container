@@ -1211,29 +1211,26 @@ namespace ft
   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   M_insert_unique(const Val& v)
   {
-    Link_type x = M_begin();
-    Link_type y = M_end();
-    bool comp = true;
-    while (x != 0)
+    Link_type _begin = M_begin(); // Link_type -> node_ptr
+    Link_type _end = M_end();
+    bool _comp = true;
+    while (_begin != NULL)
   	{
-  	  y = x;
-  	  comp = M_impl.M_key_compare(KeyOfValue()(v), S_key(x));
-  	  x = comp ? S_left(x) : S_right(x);
+  	  _end = _begin;
+  	  _comp = M_impl.M_key_compare(KeyOfValue()(v), S_key(_begin));
+  	  _begin = _comp ? S_left(_begin) : S_right(_begin);
   	}
-    iterator j = iterator(y);
-    if (comp)
+    iterator _tmp = iterator(_end);
+    if (_comp)
     {
-      if (j == begin())
-        return ft::pair<iterator,bool>(M_insert(x, y, v), true);
+      if (_tmp == begin())
+        return ft::pair<iterator,bool>(M_insert(_begin, _end, v), true);
       else
-      {
-        --j;
-        if (M_impl.M_key_compare(S_key(j.M_node), KeyOfValue()(v)))
-          return ft::pair<iterator,bool>(M_insert(x, y, v), true);
-      }
+        --_tmp;
     }
-
-    return ft::pair<iterator,bool>(j, false);
+    if (M_impl.M_key_compare(S_key(_tmp.M_node), KeyOfValue()(v)))
+      return ft::pair<iterator,bool>(M_insert(_begin, _end, v), true);
+    return ft::pair<iterator,bool>(_tmp, false);
   }
 
   template<typename Key, typename Val, typename KeyOfValue,
