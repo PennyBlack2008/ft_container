@@ -2,10 +2,10 @@
 #define _VECTOR_HPP_
 
 #include <memory>
-#include "./include/iterator.hpp"
-#include "./include/uninitialized.hpp"
-#include "./include/functexcept.hpp"
-#include "./include/algorithm.hpp"
+#include "../include/iterator.hpp"
+#include "../include/uninitialized.hpp"
+#include "../include/functexcept.hpp"
+#include "../include/algorithm.hpp"
 
 namespace ft {
     /*-----------

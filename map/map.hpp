@@ -3,9 +3,9 @@
 
 #include <functional> // std::less
 #include <memory>
-#include "include/utility.hpp" // ft::pair
-#include "include/iterator.hpp"
-#include "tree.hpp"
+#include "../include/utility.hpp" // ft::pair
+#include "../include/iterator.hpp"
+#include "../tree/tree.hpp"
 
 namespace ft
 {
