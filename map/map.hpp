@@ -329,7 +329,7 @@ namespace ft
      */
     iterator
       insert(iterator position, const value_type& x)
-    { return M_t.insert_unique(position, x); }
+    { return M_t.M_insert_unique(position, x); }
 
     /**
      *  @brief A template function that attemps to insert a range of elements.
@@ -342,7 +342,7 @@ namespace ft
     template <typename InputIterator>
     void
       insert(InputIterator first, InputIterator last)
-    { M_t.insert_unique(first, last); }
+    { M_t.M_insert_unique(first, last); }
 
     /**
      *  @brief Erases an element from a %map.

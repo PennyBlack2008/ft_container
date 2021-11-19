@@ -1,42 +1,22 @@
+#include "map/map.hpp"
 #include <iostream>
-using namespace std;
-class Student
-{
-private:
-char * name;
-int age;
-public:
-Student(char * name, int age) : age(age)
-{
-this->name = new char[10];
-strcpy(this->name, name);
-}
-void ShowInfo() {
-cout << "이름: " << name << endl;
-cout << "나이: " << age << endl;
-}
-Student& operator=(Student& ref)
-{
-delete []name;
-name = new char[10];
-strcpy(name, ref.name);
-age = ref.age;
-return *this;
-}
-~Student()
-{
-delete []name;
-cout << "~Student 소멸자 호출!" << endl;
-}
-};
-int main()
-{
-Student st1("김철수", 14);
-Student st2("홍길동", 15);
-st2 = st1;
-st1.ShowInfo();
-st2.ShowInfo();
-return 0;
-}
+#include <map>
+#include <string>
+#include "tree/tree.hpp"
+#include "include/iterator.hpp"
 
-// 출처: https://blog.hexabrain.net/177 [끝나지 않는 프로그래밍 일기]
+int main ()
+{
+  ft::map<char,int> mymap;
+
+  mymap['x'] = 100;
+  mymap['y'] = 200;
+  mymap['z'] = 300;
+
+  // show content:
+  ft::map<char,int>::reverse_iterator rit;
+  for (rit=mymap.rbegin(); rit!=mymap.rend(); ++rit)
+    std::cout << rit->first << " => " << rit->second << '\n';
+
+  return 0;
+}

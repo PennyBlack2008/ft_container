@@ -1,9 +1,9 @@
-#ifndef TREE_H
-#define TREE_H 1
+#ifndef _TREE_HPP_
+#define _TREE_HPP_ 1
 
-#include "include/algorithm.hpp" // equal
-#include "./include/iterator.hpp"
-#include "./include/utility.hpp" // ft::pair
+#include "../include/algorithm.hpp" // equal
+#include "../include/iterator.hpp"
+#include "../include/utility.hpp" // ft::pair
 
 namespace ft
 {
@@ -635,7 +635,7 @@ namespace ft
     }
 
     void
-      destroy_node(Link_type p)
+      M_destroy_node(Link_type p)
     {
       get_allocator().destroy(&p->M_value_field);
       M_put_node(p);
@@ -824,7 +824,6 @@ namespace ft
     { }
 
     RB_tree(const RB_tree& x)
-    : M_impl(x.M_impl.M_key_compare, x.M_get_Node_allocator())
     {
     	if (x.M_root() != 0)
   	  {
@@ -839,7 +838,21 @@ namespace ft
     { M_erase(M_begin()); }
 
     RB_tree&
-    operator=(const RB_tree& x);
+      operator=(const RB_tree& x)
+    {
+      if (this != &x)
+      {
+					clear();
+					M_impl.M_key_compare = x.M_impl.M_key_compare;
+					if (x.M_root() != 0) {
+						M_root() = M_copy(x.M_begin(), M_end());
+						M_leftmost() = S_minimum(M_root());
+						M_rightmost() = S_maximum(M_root());
+						M_impl.M_node_count = x.M_impl.M_node_count;
+					}
+				}
+				return *this;
+    }
 
     // Accessors.
     Compare
@@ -1042,27 +1055,27 @@ namespace ft
 	       RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
   { x.swap(y); }
 
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>&
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  operator=(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x)
-  {
-    if (this != &x)
-  	{
-  	  // Note that Key may be a constant type.
-  	  clear();
-  	  M_impl.M_key_compare = x.M_impl.M_key_compare;
-  	  if (x.M_root() != 0)
-	    {
-	      M_root() = M_copy(x.M_begin(), M_end());
-	      M_leftmost() = S_minimum(M_root());
-	      M_rightmost() = S_maximum(M_root());
-	      M_impl.M_node_count = x.M_impl.M_node_count;
-	    }
-  	}
-    return *this;
-  }
+  // template<typename Key, typename Val, typename KeyOfValue,
+  //          typename Compare, typename Alloc>
+  // RB_tree<Key,Val,KeyOfValue,Compare,Alloc>&
+  //   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
+  // operator=(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x)
+  // {
+  //   if (this != &x)
+  // 	{
+  // 	  // Note that Key may be a constant type.
+  // 	  clear();
+  // 	  M_impl.M_key_compare = x.M_impl.M_key_compare;
+  // 	  if (x.M_root() != 0)
+	//     {
+	//       M_root() = M_copy(x.M_begin(), M_end());
+	//       M_leftmost() = S_minimum(M_root());
+	//       M_rightmost() = S_maximum(M_root());
+	//       M_impl.M_node_count = x.M_impl.M_node_count;
+	//     }
+  // 	}
+  //   return *this;
+  // }
 
   //1
   template<typename Key, typename Val, typename KeyOfValue,
@@ -1557,7 +1570,7 @@ namespace ft
   	{
   	  M_erase(S_right(x));
   	  Link_type y = S_left(x);
-  	  destroy_node(x);
+  	  M_destroy_node(x);
   	  x = y;
   	}
   }

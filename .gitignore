@@ -34,3 +34,7 @@
 .vscode
 
 ./containers_test
+
+*.txt
+
+*.out
