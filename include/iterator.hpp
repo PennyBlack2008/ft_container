@@ -248,55 +248,79 @@ namespace ft {
 					                                      Container>::type>& i)
 				: M_current(i.base()) { }
 
-			reference operator*() const {
+			reference
+				operator*() const
+			{
 				return *M_current;
 			}
 
-			pointer operator->() const {
+			pointer
+				operator->() const
+			{
 				return M_current;
 			}
 
-			normal_iterator& operator++() {
+			normal_iterator&
+				operator++()
+			{
 				++M_current;
 				return *this;
 			}
 
-			normal_iterator operator++(int) {
+			normal_iterator
+				operator++(int)
+			{
 				return normal_iterator(M_current++);
 			}
 
-			normal_iterator& operator--() {
+			normal_iterator&
+				operator--()
+			{
 				--M_current;
 				return *this;
 			}
 
-			normal_iterator& operator--(int) {
+			normal_iterator
+				operator--(int)
+			{
 				return normal_iterator(M_current--);
 			}
 
-			reference operator[](const difference_type& n) const {
+			reference
+				operator[](const difference_type& n) const
+			{
 				return M_current[n];
 			}
 
-			normal_iterator& operator+=(const difference_type& n) {
+			normal_iterator&
+				operator+=(const difference_type& n)
+			{
 				M_current += n;
 				return *this;
 			}
 
-			normal_iterator& operator+(const difference_type& n) const {
+			normal_iterator
+				operator+(const difference_type& n) const
+			{
 				return normal_iterator(M_current + n);
 			}
 
-			normal_iterator& operator-=(const difference_type& n) {
+			normal_iterator&
+				operator-=(const difference_type& n)
+			{
 				M_current -= n;
 				return *this;
 			}
 
-			normal_iterator operator-(const difference_type& n) const {
+			normal_iterator
+				operator-(const difference_type& n) const
+			{
 				return normal_iterator(M_current - n);
 			}
 
-			const Iterator& base() const {
+			const Iterator&
+				base() const
+			{
 				return M_current;
 			}
 	};

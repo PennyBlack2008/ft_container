@@ -55,7 +55,10 @@ namespace ft {
 	}
 
 	template<typename InputIterator, typename ForwardIterator, typename T>
-	inline ForwardIterator uninitialized_copy_a(InputIterator first, InputIterator last, ForwardIterator result, std::allocator<T>) {
+	inline ForwardIterator
+		uninitialized_copy_a(InputIterator first, InputIterator last,
+							 ForwardIterator result, std::allocator<T>)
+	{
 		return std::uninitialized_copy(first, last, result);
 	}	
 

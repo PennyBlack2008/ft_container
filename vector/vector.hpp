@@ -122,9 +122,10 @@ namespace ft {
             this->M_impl.M_finish = this->M_impl.M_start + n;
         }
         /* x벡터의 복사본을 지정합니다. */
-        vector(const vector& x) : Base(x.size(), x.M_get_T_allocator()) {
-            this->M_impl.M_finish = ft::uninitialized_copy_a(x.begin(), x.end(),
-                                            this->M_impl.M_start);
+        vector(const vector& x) : Base(x.size(), x.M_get_T_allocator())
+        {
+          this->M_impl.M_finish = ft::uninitialized_copy_a(x.begin(), x.end(),
+                                                           this->M_impl.M_start, M_get_T_allocator());
         }
 
         /* 벡터의 범위(first, last)를 복사합니다. */
@@ -228,7 +229,7 @@ namespace ft {
   			------------*/
         /* @operator[] Access element 해당 컨테이너의 메모리 주소에서 n을 더해 그 주소의 시작점이 가리키는 값을 반환 */
         reference operator[](size_type n) {
-            return *(this->M_impl._M_start + n);
+            return *(this->M_impl.M_start + n);
         }
 
         const_reference operator[](size_type n) const {
