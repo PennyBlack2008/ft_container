@@ -42,15 +42,15 @@ namespace ft {
 	template<class T> class allocator;
 
 	template<class ForwardIterator, typename Allocator>
-	void Destroy(ForwardIterator first, ForwardIterator last, Allocator alloc) {
+	void Destroy(ForwardIterator first, ForwardIterator last, Allocator alloc)
+	{
 		for (;first != last; ++first)
 			alloc.destroy(&*first);
 	}
 
 	template<class ForwardIterator, typename T>
-	inline void Destroy(ForwardIterator first, ForwardIterator last, allocator<T>) {
-		Destroy(first, last);
-	}
+	inline void Destroy(ForwardIterator first, ForwardIterator last, allocator<T>)
+	{ Destroy(first, last); }
 }
 
 #endif

@@ -9,12 +9,12 @@ namespace ft {
 	/*--
 	swap
 	--*/
-	template<typename T>
-	inline void swap(T& a, T& b) {
-		T tmp = a;
-		a = b;
-		b = tmp;
-	}
+	// template<typename T>
+	// inline void swap(T& a, T& b) {
+	// 	T tmp = a;
+	// 	a = b;
+	// 	b = tmp;
+	// }
 
 	/*---
 	equal
@@ -66,7 +66,8 @@ namespace ft {
 	---------------------*/
 	template<typename InputIterator1, typename InputIterator2>
 	bool
-	lexicographical_compare(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2)
+	lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
+							InputIterator2 first2, InputIterator2 last2)
 	{
 		for (;first1 != last1 && first2 != last2; ++first1, ++first2) {
 			if (*first1 < *first2)
@@ -74,24 +75,28 @@ namespace ft {
 			if (*first2 < *first1)
 				return false;
 		}
-		return first1 == last1 && first2 != last2;
+		return (first1 == last1 && first2 != last2);
 	}
 
 	template<typename InputIterator1, typename InputIterator2, typename Compare>
 	bool
-	lexicographical_compare(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, Compare comp)
+	lexicographical_compare(InputIterator1 first1, InputIterator1 last1,
+							InputIterator2 first2, InputIterator2 last2,
+							Compare comp)
 	{
-		for (;first1 != last1 && first2 != last2; ++first1, ++first2) {
+		for (;first1 != last1 && first2 != last2; ++first1, ++first2)
+		{
 			if (comp(*first1, *first2))
 				return true;
 			if (comp(*first2, *first1))
 				return false;
 		}
-		return first1 == last1 && first2 != last2;
+		return (first1 == last1 && first2 != last2);
 	}
 
 	inline bool
-	lexicographical_compare(const unsigned char* first1, const unsigned char* last1, const unsigned char* first2, const unsigned char* last2)
+		lexicographical_compare(const unsigned char* first1, const unsigned char* last1,
+								const unsigned char* first2, const unsigned char* last2)
 	{
 		const size_t	len1 = last1 - first1;
 		const size_t	len2 = last2 - first2;
@@ -100,18 +105,19 @@ namespace ft {
 	}
 
 	inline bool
-	lexicographical_compare(const char* first1, const char* last1, const char* first2, const char* last2)
+		lexicographical_compare(const char* first1, const char* last1,
+								const char* first2, const char* last2)
 	{
 		#if CHAR_MAX == SCHAR_MAX
 			return ft::lexicographical_compare((const signed char*) first1,
-					(const signed char*) last1,
-					(const signed char*) first2,
-					(const signed char*) last2);
+											   (const signed char*) last1,
+											   (const signed char*) first2,
+											   (const signed char*) last2);
 		#else
 			return ft::lexicographical_compare((const unsigned char*) first1,
-					(const unsigned char*) last1,
-					(const unsigned char*) first2,
-					(const unsigned char*) last2);
+											   (const unsigned char*) last1,
+											   (const unsigned char*) first2,
+											   (const unsigned char*) last2);
 		#endif
 	}
 }
