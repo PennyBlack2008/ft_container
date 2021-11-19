@@ -4,6 +4,7 @@
 #include "../include/algorithm.hpp" // equal
 #include "../include/iterator.hpp"
 #include "../include/utility.hpp" // ft::pair
+#include <memory>
 
 namespace ft
 {
@@ -901,7 +902,7 @@ namespace ft
 
     size_type
       max_size() const
-    { return size_type(-1); }
+    { return get_allocator().max_size(); }
 
     void
       swap(RB_tree& t);
