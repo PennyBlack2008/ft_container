@@ -217,7 +217,7 @@ namespace ft {
                 const size_type old_size = size();
                 pointer tmp = M_allocate_and_copy(n, this->M_impl.M_start, this->M_impl.M_finish);
                 ft::Destroy(this->M_impl.M_start, this->M_impl.M_finish, M_get_T_allocator());
-                M_deallocate(this->M_impl.M_start, this->M_impl.M_end_of_storage - this->M_impl._M_start);
+                M_deallocate(this->M_impl.M_start, this->M_impl.M_end_of_storage - this->M_impl.M_start);
                 this->M_impl.M_start = tmp;
                 this->M_impl.M_finish = tmp + old_size;
                 this->M_impl.M_end_of_storage = this->M_impl.M_start + n;
@@ -303,16 +303,21 @@ namespace ft {
         }
 
         /* @insert Insert elements */
-        iterator insert(iterator position, const value_type& x) {
-            const size_type n = position - begin();
-            if (this->M_impl.M_finish != this->M_impl.M_end_of_storage && position == end()) {
-                this->M_impl.construct(this->M_impl.M_finish, x);
-                ++this->M_impl.M_finish;
-            }
-            else {
-                M_insert(position, x);
-                return iterator(this->M_impl.M_start + n);
-            }
+        iterator
+          insert(iterator position, const value_type& x)
+        {
+          const size_type n = position - begin();
+          if (this->M_impl.M_finish != this->M_impl.M_end_of_storage
+              && position == end())
+          {
+            this->M_impl.construct(this->M_impl.M_finish, x);
+            ++this->M_impl.M_finish;
+          }
+          else
+          {
+            M_insert(position, x);
+          }
+          return iterator(this->M_impl.M_start + n);
         }
 
         void insert(iterator position, size_type n, const value_type& x)
@@ -334,7 +339,7 @@ namespace ft {
             /* position 자리에 새로운 position + 1 부터 end()까지의 메모리를 붙여준다 */
             std::copy(position + 1, end(), position);
             --this->M_impl.M_finish; // 메모리가 1자리 앞당겨지므로 감소
-            this->M_impl.destroy(this->M_impl._M_finish); // 마지막 자리 deallocate
+            this->M_impl.destroy(this->M_impl.M_finish); // 마지막 자리 deallocate
             return position;
         }
 
@@ -355,7 +360,7 @@ namespace ft {
 
         /* @clear Clear content vector 다 지운다 */
         void clear() {
-          M_erase_at_end(this->_M_impl._M_start);
+          M_erase_at_end(this->M_impl.M_start);
         }
 
     protected:
@@ -430,7 +435,7 @@ namespace ft {
             ft::Destroy(std::copy(x.begin(), x.end(), begin()), end(), M_get_T_allocator());
           }
           else {
-            std::copy(x.M_impl.M_start, x.M_impl._M_start + size(), this->M_impl._M_start);
+            std::copy(x.M_impl.M_start, x.M_impl.M_start + size(), this->M_impl.M_start);
 				    std::uninitialized_copy(x.M_impl.M_start + size(), x.M_impl.M_finish, this->M_impl.M_finish);
           }
           this->M_impl.M_finish = this->M_impl.M_start + xlen;

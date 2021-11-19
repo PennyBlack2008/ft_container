@@ -3,32 +3,29 @@
 // #include <vector>
 #include "vector/vector.hpp"
 
-int		main(void)
+int main ()
 {
-	ft::vector<int> vct(7);
+  ft::vector<int> myvector (3,100);
+  ft::vector<int>::iterator it;
 
-	for (unsigned long int i = 0; i < vct.size(); ++i)
-	{
-		vct.at(i) = (vct.size() - i) * 3;
-		std::cout << "vct[]: " << vct[i] << std::endl;
-	}
+  it = myvector.begin();
+  it = myvector.insert ( it , 200 );
 
-	ft::vector<int> const vct_c(vct);
+  myvector.insert (it,2,300);
 
-	std::cout << "front(): " << vct.front() << " " << vct_c.front() << std::endl;
-	std::cout << "back(): " << vct.back() << " " <<  vct_c.back() << std::endl;
+  // "it" no longer valid, get a new one:
+  it = myvector.begin();
 
-	for (unsigned long int i = 0; i < vct_c.size(); ++i)
-		std::cout << "vct_c.at(): " << vct_c.at(i) << std::endl;
-	try {
-		std::cout << vct_c.at(10) << std::endl;
-	}
-	catch (std::out_of_range &e) {
-		std::cout << "Catch out_of_range exception!" << std::endl;
-	}
-	catch (std::exception &e) {
-		std::cout << "Catch exception: " << e.what() << std::endl;
-	}
+  ft::vector<int> anothervector (2,400);
+  myvector.insert (it+2,anothervector.begin(),anothervector.end());
 
-	return (0);
+  int myarray [] = { 501,502,503 };
+  myvector.insert (myvector.begin(), myarray, myarray+3);
+
+  std::cout << "myvector contains:";
+  for (it=myvector.begin(); it<myvector.end(); it++)
+    std::cout << ' ' << *it;
+  std::cout << '\n';
+
+  return 0;
 }
