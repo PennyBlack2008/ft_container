@@ -12,13 +12,13 @@ namespace ft
 
   struct RB_tree_node_base
   {
-    typedef RB_tree_node_base* Base_ptr;
-    typedef const RB_tree_node_base* Const_Base_ptr;
+    typedef RB_tree_node_base*        Base_ptr;
+    typedef const RB_tree_node_base*  Const_Base_ptr;
 
     RB_tree_color M_color;
-    Base_ptr M_parent;
-    Base_ptr M_left;
-    Base_ptr M_right;
+    Base_ptr      M_parent;
+    Base_ptr      M_left;
+    Base_ptr      M_right;
 
     static Base_ptr
     S_minimum(Base_ptr x)
@@ -52,14 +52,27 @@ namespace ft
   template<typename Val>
   struct RB_tree_node : public RB_tree_node_base
   {
-    typedef RB_tree_node<Val>* Link_type;
-    Val M_value_field;
+    typedef RB_tree_node<Val>*  Link_type;
+    Val                         M_value_field;
   };
 
+  /* 
+  * 증감 연산자에 사용되는 함수
+  * RB_tree_increment, RB_tree_decrement
+  */
+
+  /* 
+  * - RB_tree_increment는 node x를 탐색하는 iterator가 node x보다 하나 더 큰 node를 찾는다.
+  *   - 오른쪽 자식이 있다면 오른쪽 자식에서 가장 왼쪽에 있는 node를 찾는다.
+  *   - 자신 보다 큰 오른쪽 자식이 없다면 부모 node로 올라가고 자신이 부모의 오른쪽 자식이었는 지 확인한다.
+  *     자기가 오른쪽 자식이었다면 다시 부모 node로 올라가 반복 작업을 하고, 왼쪽 자식이었다면 그대로 멈춘다.
+  *   - 노드 삭제 과정에서 node x의 부모가 node x의 자식과 같게 되는 예외상황이 발생하는 데 이 때,
+  *     부모 node로 올라가지 않는다.
+  */
   RB_tree_node_base*
     RB_tree_increment(RB_tree_node_base* x)
   {
-    if (x->M_right != 0) 
+    if (x->M_right != 0)
     {
       x = x->M_right;
       while (x->M_left != 0)
@@ -69,25 +82,35 @@ namespace ft
     {
       RB_tree_node_base* y = x->M_parent;
       while (x == y->M_right) 
-        {
-          x = y;
-          y = y->M_parent;
-        }
-      if (x->M_right != y)
+      {
+        x = y;
+        y = y->M_parent;
+      }
+      if (x->M_right != y) // 삭제 과정에서 일어나는 예외를 if문으로 처리
         x = y;
     }
     return x;
   }
 
   const RB_tree_node_base*
-  RB_tree_increment(const RB_tree_node_base* x)
+    RB_tree_increment(const RB_tree_node_base* x)
   {
     return RB_tree_increment(const_cast<RB_tree_node_base*>(x));
   }
 
+  /* RB_tree_decrement
+  * - RB_tree_decrement는 node x를 탐색하는 iterator가 node x보다 하나 더 작은 node를 찾는다.
+  * - 가장 위에 있는 if문은 삭제할 때 생기는 예외처리이다.
+  * - 만약 node x의 left가 존재하면 그 left node로 넘어간 후, 그 left node에서 가장 right에 있는
+  *   값을 찾는다.
+  * - 만약 node x의 left가 없다면, 부모로 올라가서 자신이 부모의 left node였는 지 확인하고,
+  *   (i) 자기가 left node였다면, 부모의 부모로 올라가서 위를 다시 반복한다.
+  *   (ii) 자기가 left node가 아니었다면, 그 부모를 return 한다.
+  */
   RB_tree_node_base*
-  RB_tree_decrement(RB_tree_node_base* x)
+    RB_tree_decrement(RB_tree_node_base* x)
   {
+    // 첫 if문은 삭제할 때 생기는 예외상황을 처리
     if (x->M_color == RED 
         && x->M_parent->M_parent == x)
       x = x->M_right;
@@ -184,26 +207,21 @@ namespace ft
     Base_ptr M_node;
   };
 
-  // typedef ft::RB_tree_node_base::Base_ptr
-  // ft::RB_tree_iterator<T>::Base_ptr
-
-  //
-  //
   template<typename T>
   struct RB_tree_const_iterator
   {
-    typedef T value_type;
-    typedef const T& reference;
-    typedef const T* pointer;
+    typedef T         value_type;
+    typedef const T&  reference;
+    typedef const T*  pointer;
 
     typedef RB_tree_iterator<T> iterator;
 
     typedef std::bidirectional_iterator_tag iterator_category;
-    typedef ptrdiff_t difference_type;
+    typedef ptrdiff_t                       difference_type;
 
-    typedef RB_tree_const_iterator<T> Self;
-    typedef RB_tree_node_base::Const_Base_ptr Base_ptr;
-    typedef const RB_tree_node<T>* Link_type;
+    typedef RB_tree_const_iterator<T>           Self;
+    typedef RB_tree_node_base::Const_Base_ptr   Base_ptr;
+    typedef const RB_tree_node<T>*              Link_type;
 
     RB_tree_const_iterator()
       : M_node() { }
@@ -223,14 +241,14 @@ namespace ft
     { return &static_cast<Link_type>(M_node)->M_value_field; }
 
     Self&
-    operator++()
+      operator++()
     {
       M_node = RB_tree_increment(M_node);
       return *this;
     }
 
     Self
-    operator++(int)
+      operator++(int)
     {
       Self tmp = *this;
       M_node = RB_tree_increment(M_node);
@@ -275,46 +293,60 @@ namespace ft
                const RB_tree_const_iterator<Val>& y)
   { return x.M_node != y.M_node; }
 
+  /*
+  * RB_tree_rotate_left: Insert, Delete 시에 사용됨
+  * 01. x의 오른쪽 자식 노드를 y에 저장한다.
+  * 02. x의 오른쪽 자식노드를 B로 만든다.
+  * 03. B의 부모노드를 x로 만드는 link를 연결한다.
+  * 04. y의 부모노드를 현재 x부모노드로 할당한다.
+  * 05. x의 부모노드가 NIL이라면, 즉 x가 root라면
+  * 06. y를 root로 설정한다.
+  * 07. 그렇지 않고 x의 부모노드가 존재한다면, 부모노드의 왼쪽 자식이었다면,
+  * 08. y가 x의 부모노드의 왼쪽 자식노드가 되고
+  * 09. 그렇지 않다면, y는 x의 부모노드의 오른쪽 자식이 된다.
+  * 10. x가 y의 왼쪽 자식이 되게하고,
+  * 11. y가 x의 부모노드가 되도록한다.
+  **/
   void
-    RB_tree_rotate_left(RB_tree_node_base* const parent,
+    RB_tree_rotate_left(RB_tree_node_base* const x,
                         RB_tree_node_base*& root)
   {
-    RB_tree_node_base* const rightChild = parent->M_right;
+    RB_tree_node_base* const y = x->M_right; // (01)
 
-    parent->M_right = rightChild->M_left;
-    if (rightChild->M_left !=0)
-      rightChild->M_left->M_parent = parent;
-    rightChild->M_parent = parent->M_parent;
+    x->M_right = y->M_left; // (02)
+    if (y->M_left !=0)
+      y->M_left->M_parent = x; // (03)
+    y->M_parent = x->M_parent; // (04)
 
-    if (parent == root)
-      root = rightChild;
-    else if (parent == parent->M_parent->M_left)
-      parent->M_parent->M_left = rightChild;
+    if (x == root) // (05)
+      root = y; // (06)
+    else if (x == x->M_parent->M_left) // (07)
+      x->M_parent->M_left = y; // (08)
     else
-      parent->M_parent->M_right = rightChild;
-    rightChild->M_left = parent;
-    parent->M_parent = rightChild;
+      x->M_parent->M_right = y; // (09)
+    y->M_left = x; // (10)
+    x->M_parent = y; // (11)
   }
 
   void
-    RB_tree_rotate_right(RB_tree_node_base* const parent,
+    RB_tree_rotate_right(RB_tree_node_base* const x,
                          RB_tree_node_base*& root)
   {
-    RB_tree_node_base* const leftChild = parent->M_left;
+    RB_tree_node_base* const y = x->M_left;
 
-    parent->M_left = leftChild->M_right;
-    if (leftChild->M_right != 0)
-      leftChild->M_right->M_parent = parent;
-    leftChild->M_parent = parent->M_parent;
+    x->M_left = y->M_right;
+    if (y->M_right != 0)
+      y->M_right->M_parent = x;
+    y->M_parent = x->M_parent;
 
-    if (parent == root)
-      root = leftChild;
-    else if (parent == parent->M_parent->M_right)
-      parent->M_parent->M_right = leftChild;
+    if (x == root)
+      root = y;
+    else if (x == x->M_parent->M_right)
+      x->M_parent->M_right = y;
     else
-      parent->M_parent->M_left = leftChild;
-    leftChild->M_right = parent;
-    parent->M_parent = leftChild;
+      x->M_parent->M_left = y;
+    y->M_right = x;
+    x->M_parent = y;
   }
 
   void
@@ -911,34 +943,18 @@ namespace ft
     ft::pair<iterator,bool>
       M_insert_unique(const value_type& x);
 
-    iterator
-      M_insert_equal(const value_type& x);
-
     // _GLIBCXX_RESOLVE_LIB_DEFECTS
     // 233. Insertion hints in associative containers.
     
-    iterator
-      M_insert_equal_lower(const value_type& x);
-
     iterator
       M_insert_unique(iterator position, const value_type& x);
 
     const_iterator
       M_insert_unique(const_iterator position, const value_type& x);
 
-    iterator
-      M_insert_equal(iterator position, const value_type& x);
-
-    const_iterator
-      M_insert_equal(const_iterator position, const value_type& x);
-
     template<typename InputIterator>
     void
       M_insert_unique(InputIterator first, InputIterator last);
-
-    template<typename InputIterator>
-    void
-      M_insert_equal(InputIterator first, InputIterator last);
 
     void
       erase(iterator position);
@@ -1124,7 +1140,7 @@ namespace ft
   {
     bool insert_left = (x != 0 || p == M_end()
                         || M_impl.M_key_compare(KeyOfValue()(v), 
-                        S_key(p)));
+                                                S_key(p)));
 
     Link_type z = M_create_node(v);
 
@@ -1133,40 +1149,6 @@ namespace ft
                                  this->M_impl.M_header);
     ++M_impl.M_node_count;
     return const_iterator(z);
-  }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  M_insert_equal(const Val& v)
-  {
-    Link_type x = M_begin();
-    Link_type y = M_end();
-    while (x != 0)
-  	{
-  	  y = x;
-  	  x = M_impl.M_key_compare(KeyOfValue()(v), S_key(x)) ?
-                               S_left(x) : S_right(x);
-  	}
-    return M_insert(x, y, v);
-  }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  M_insert_equal_lower(const Val& v)
-  {
-    Link_type x = M_begin();
-    Link_type y = M_end();
-    while (x != 0)
-    {
-      y = x;
-      x = !M_impl.M_key_compare(S_key(x), KeyOfValue()(v)) ?
-            S_left(x) : S_right(x);
-    }
-    return M_insert_lower(x, y, v);
   }
 
   template<typename Key, typename Val, typename KeyOfValue,
@@ -1360,126 +1342,6 @@ namespace ft
 	    return position; // Equivalent keys.
   }
 
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  M_insert_equal(iterator position, const Val& v)
-  {
-    // end()
-    if (position.M_node == M_end())
-    {
-      if (size() > 0
-          && !M_impl.M_key_compare(KeyOfValue()(v),
-            S_key(M_rightmost())))
-        return M_insert(0, M_rightmost(), v);
-      else
-        return M_insert_equal(v);
-    }
-    else if (!M_impl.M_key_compare(S_key(position.M_node),
-              KeyOfValue()(v)))
-    {
-      // First, try before...
-      iterator before = position;
-      if (position.M_node == M_leftmost()) // begin()
-        return M_insert(M_leftmost(), M_leftmost(), v);
-      else if (!M_impl.M_key_compare(KeyOfValue()(v),
-               S_key((--before).M_node)))
-      {
-        if (S_right(before.M_node) == 0)
-          return M_insert(0, before.M_node, v);
-        else
-          return M_insert(position.M_node,
-                          position.M_node, v);
-      }
-      else
-        return M_insert_equal(v);
-    }
-    else
-    {
-      // ... then try after.  
-      iterator after = position;
-      if (position.M_node == M_rightmost())
-        return M_insert(0, M_rightmost(), v);
-      else if (!M_impl.M_key_compare(S_key((++after).M_node),
-                                     KeyOfValue()(v)))
-      {
-        if (S_right(position.M_node) == 0)
-          return M_insert(0, position.M_node, v);
-        else
-          return M_insert(after.M_node, after.M_node, v);
-      }
-      else
-        return M_insert_equal_lower(v);
-    }
-  }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::const_iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  M_insert_equal(const_iterator position, const Val& v)
-  {
-    // end()
-    if (position.M_node == M_end())
-    {
-      if (size() > 0
-          && !M_impl.M_key_compare(KeyOfValue()(v),
-                                   S_key(M_rightmost())))
-        return M_insert(0, M_rightmost(), v);
-      else
-        return const_iterator(M_insert_equal(v));
-    }
-    else if (!M_impl.M_key_compare(S_key(position.M_node),
-                                   KeyOfValue()(v)))
-    {
-      // First, try before...
-      const_iterator before = position;
-      if (position.M_node == M_leftmost()) // begin()
-        return M_insert(M_leftmost(), M_leftmost(), v);
-      else if (!M_impl.M_key_compare(KeyOfValue()(v),
-                                     S_key((--before).M_node)))
-      {
-        if (S_right(before.M_node) == 0)
-          return M_insert(0, before.M_node, v);
-        else
-          return M_insert(position.M_node,
-                          position.M_node, v);
-      }
-      else
-        return const_iterator(M_insert_equal(v));
-    }
-    else
-    {
-      // ... then try after.  
-      iterator after = position;
-      if (position.M_node == M_rightmost())
-        return M_insert(0, M_rightmost(), v);
-      else if (!M_impl.M_key_compare(S_key((++after).M_node),
-                                     KeyOfValue()(v)))
-      {
-        if (S_right(position.M_node) == 0)
-          return M_insert(0, position.M_node, v);
-        else
-          return M_insert(after.M_node, after.M_node, v);
-      }
-      else
-        return const_iterator(M_insert_equal_lower(v));
-    }
-  }
-
-  // 3
-  template<typename Key, typename Val, typename KoV,
-           typename Cmp, typename Alloc>
-  template<class II>
-  void
-    RB_tree<Key,Val,KoV,Cmp,Alloc>::
-    M_insert_equal(II first, II last)
-  {
-    for ( ; first != last; ++first)
-      M_insert_equal(end(), *first);
-  }
-
   template<typename Key, typename Val, typename KoV,
            typename Cmp, typename Alloc>
   template<class II>
@@ -1564,7 +1426,7 @@ namespace ft
            typename Compare, typename Alloc>
   void
     RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-    M_erase(Link_type x)
+  M_erase(Link_type x)
   {
     // Erase without rebalancing.
     while (x != 0)
@@ -1580,7 +1442,7 @@ namespace ft
            typename Compare, typename Alloc>
   void
     RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-    erase(iterator first, iterator last)
+  erase(iterator first, iterator last)
   {
     if (first == begin() && last == end())
 	    clear();
@@ -1592,7 +1454,7 @@ namespace ft
            typename Compare, typename Alloc>
   void
     RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-    erase(const_iterator first, const_iterator last)
+  erase(const_iterator first, const_iterator last)
   {
     if (first == begin() && last == end())
 	    clear();
@@ -1604,7 +1466,7 @@ namespace ft
            typename Compare, typename Alloc>
   void
     RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-    erase(const Key* first, const Key* last)
+  erase(const Key* first, const Key* last)
   {
     while (first != last) erase(*first++);
   }
@@ -1619,10 +1481,12 @@ namespace ft
     Link_type y = M_end(); // Last node which is not less than k.
 
     while (x != 0)
+    {
       if (!M_impl.M_key_compare(S_key(x), k))
         y = x, x = S_left(x);
       else
         x = S_right(x);
+    }
 
     iterator j = iterator(y);
     return (j == end()
