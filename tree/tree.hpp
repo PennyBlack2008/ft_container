@@ -86,7 +86,10 @@ namespace ft
         x = y;
         y = y->M_parent;
       }
-      if (x->M_right != y) // 삭제 과정에서 일어나는 예외를 if문으로 처리
+      /*
+      *  예외처리: x가 header일 때를 위한 조건문
+      */
+      if (x->M_right != y) 
         x = y;
     }
     return x;
@@ -98,9 +101,10 @@ namespace ft
     return RB_tree_increment(const_cast<RB_tree_node_base*>(x));
   }
 
-  /* RB_tree_decrement
+  /* 
+  * RB_tree_decrement
   * - RB_tree_decrement는 node x를 탐색하는 iterator가 node x보다 하나 더 작은 node를 찾는다.
-  * - 가장 위에 있는 if문은 삭제할 때 생기는 예외처리이다.
+  * - 가장 위에 있는 if문은 헤더와 노드한개가 있을 때 생기는 예외처리이다.(헤더는 새로운 노드를 자식과 동시에 부모로 삼는다)
   * - 만약 node x의 left가 존재하면 그 left node로 넘어간 후, 그 left node에서 가장 right에 있는
   *   값을 찾는다.
   * - 만약 node x의 left가 없다면, 부모로 올라가서 자신이 부모의 left node였는 지 확인하고,
@@ -110,7 +114,7 @@ namespace ft
   RB_tree_node_base*
     RB_tree_decrement(RB_tree_node_base* x)
   {
-    // 첫 if문은 삭제할 때 생기는 예외상황을 처리
+    // x가 Header일 때 적용되는 상황 Header node에서 --를 할 때의 상황
     if (x->M_color == RED 
         && x->M_parent->M_parent == x)
       x = x->M_right;
@@ -386,35 +390,45 @@ namespace ft
       if (parent == header.M_right)
         header.M_right = newNode; // maintain rightmost pointing to max node
     }
-    // Rebalance.
+
+    /* 삽입에서의 Rebalancing
+    *  삽입에서의 Rebalancing은 Case 1, 2로 나뉜다.
+    *  Case 1. 부모 노드가 레드인 데, 부모의 형제가 없거나 블랙일 때 => 회전
+    *  Case 2. 부모 노드가 레드인 데, 부모의 형제가 레드일 때 => 색상 변환
+    *  xpp: GP(Grand parent)
+    */
     while (newNode != root
 	         && newNode->M_parent->M_color == RED)
     {
 	    RB_tree_node_base* const xpp = newNode->M_parent->M_parent;
 
-    	if (newNode->M_parent == xpp->M_left)
+    	if (newNode->M_parent == xpp->M_left) // 본인의 부모가 xpp->M_left이고, 부모의 형제는 xpp->M_right이다.
   	  {
-  	    RB_tree_node_base* const y = xpp->M_right;
-  	    if (y && y->M_color == RED)
+  	    RB_tree_node_base* const y = xpp->M_right; // y는 부모의 형제
+  	    if (y && y->M_color == RED) // 부모의 형제까지 RED라면
 	      {
+          // 이 if문 안에서 부모와 부모의 형제는 RED인 상태이다.
+          // 부모와 부모의 형제를 BLACK으로, 조부모를 RED로 바꿔준뒤
       		newNode->M_parent->M_color = BLACK;
       		y->M_color = BLACK;
       		xpp->M_color = RED;
+          // newNode에 부모를 넣어줘서 다시 while문을 돌려줘서 조부모의 윗세대도 정리해준다.
       		newNode = xpp;
 	      }
-  	    else
+  	    else // 부모의 형제까지 BLACK이거나 부모의 형제가 없다면
 	      {
-  	    	if (newNode == newNode->M_parent->M_right)
+  	    	if (newNode == newNode->M_parent->M_right) // 본인이 부모의 오른쪽 자식이라면
     		  {
     		    newNode = newNode->M_parent;
-    		    RB_tree_rotate_left(newNode, root);
+    		    RB_tree_rotate_left(newNode, root); // 부모를 기준으로 좌회전을 한다.
     		  }
-      		newNode->M_parent->M_color = BLACK;
-      		xpp->M_color = RED;
+          else
+      		  newNode->M_parent->M_color = BLACK; // 부모의 색을 BLACK으로 만들고
+      		xpp->M_color = RED; // 조부모의 색을 빨간색으로 바꿔준다.
       		RB_tree_rotate_right(xpp, root);
 	      }
   	  }
-    	else
+    	else  // 본인의 부모가 xpp->M_right이고, 부모의 형제는 xpp->M_left이다.
   	  {
   	    RB_tree_node_base* const y = xpp->M_left;
   	    if (y && y->M_color == RED)
@@ -1011,10 +1025,6 @@ namespace ft
 
     ft::pair<const_iterator, const_iterator>
       equal_range(const key_type& x) const;
-
-    // Debugging.
-    bool
-      rb_verify() const;
   };
 
   template<typename Key, typename Val, typename KeyOfValue,
@@ -1072,27 +1082,6 @@ namespace ft
 	       RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
   { x.swap(y); }
 
-  // template<typename Key, typename Val, typename KeyOfValue,
-  //          typename Compare, typename Alloc>
-  // RB_tree<Key,Val,KeyOfValue,Compare,Alloc>&
-  //   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  // operator=(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x)
-  // {
-  //   if (this != &x)
-  // 	{
-  // 	  // Note that Key may be a constant type.
-  // 	  clear();
-  // 	  M_impl.M_key_compare = x.M_impl.M_key_compare;
-  // 	  if (x.M_root() != 0)
-	//     {
-	//       M_root() = M_copy(x.M_begin(), M_end());
-	//       M_leftmost() = S_minimum(M_root());
-	//       M_rightmost() = S_maximum(M_root());
-	//       M_impl.M_node_count = x.M_impl.M_node_count;
-	//     }
-  // 	}
-  //   return *this;
-  // }
 
   //1
   template<typename Key, typename Val, typename KeyOfValue,
@@ -1373,9 +1362,9 @@ namespace ft
     erase(const_iterator position)
   {
     Link_type y =
-      static_cast<Link_type>(RB_tree_rebalance_for_erase
-				                      (const_cast<Base_ptr>(position.M_node),
-                               this->M_impl.M_header));
+      static_cast<Link_type>(RB_tree_rebalance_for_erase(
+                                                         const_cast<Base_ptr>(position.M_node),
+                                                                              this->M_impl.M_header));
     M_destroy_node(y);
     --M_impl.M_node_count;
   }
@@ -1637,45 +1626,6 @@ namespace ft
     } while (1);
 
     return sum;
-  }
-
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  bool
-    RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::rb_verify() const
-  {
-    if (M_impl.M_node_count == 0 || begin() == end())
-      return M_impl.M_node_count == 0 && begin() == end()
-             && this->M_impl.M_header.M_left == M_end()
-             && this->M_impl.M_header.M_right == M_end();
-
-    unsigned int len = RB_tree_black_count(M_leftmost(), M_root());
-    for (const_iterator it = begin(); it != end(); ++it)
-  	{
-  	  Const_Link_type x = static_cast<Const_Link_type>(it.M_node);
-  	  Const_Link_type L = S_left(x);
-  	  Const_Link_type R = S_right(x);
-
-  	  if (x->M_color == RED)
-  	    if ((L && L->M_color == RED) || (R && R->M_color == RED))
-  	      return false;
-
-  	  if (L && M_impl.M_key_compare(S_key(x), S_key(L)))
-  	    return false;
-  	  if (R && M_impl.M_key_compare(S_key(R), S_key(x)))
-  	    return false;
-
-  	  if (!L && !R && RB_tree_black_count(x, M_root()) != len)
-  	    return false;
-  	}
-
-    if (M_leftmost() != RB_tree_node_base::S_minimum(M_root()))
-    	return false;
-    if (M_rightmost() != RB_tree_node_base::S_maximum(M_root()))
-	    return false;
-
-    return true;
   }
 }
 
