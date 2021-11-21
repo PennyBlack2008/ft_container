@@ -391,12 +391,13 @@ namespace ft
         header.M_right = newNode; // maintain rightmost pointing to max node
     }
 
-    /* 삽입에서의 Rebalancing
+    /*                    삽입에서의 Rebalancing                     *\
     *  삽입에서의 Rebalancing은 Case 1, 2로 나뉜다.
     *  Case 1. 부모 노드가 레드인 데, 부모의 형제가 없거나 블랙일 때 => 회전
     *  Case 2. 부모 노드가 레드인 데, 부모의 형제가 레드일 때 => 색상 변환
+    *  처리 이후, 다시한번 while문을 도는 데, 최악의 경우 O(log n)의 시간이 걸린다.
     *  xpp: GP(Grand parent)
-    */
+    \*                                                            */
     while (newNode != root
 	         && newNode->M_parent->M_color == RED)
     {
@@ -405,17 +406,16 @@ namespace ft
     	if (newNode->M_parent == xpp->M_left) // 본인의 부모가 xpp->M_left이고, 부모의 형제는 xpp->M_right이다.
   	  {
   	    RB_tree_node_base* const y = xpp->M_right; // y는 부모의 형제
-  	    if (y && y->M_color == RED) // 부모의 형제까지 RED라면
+  	    if (y && y->M_color == RED) // 부모의 형제까지 RED라면, ==> Case 2
 	      {
           // 이 if문 안에서 부모와 부모의 형제는 RED인 상태이다.
           // 부모와 부모의 형제를 BLACK으로, 조부모를 RED로 바꿔준뒤
       		newNode->M_parent->M_color = BLACK;
       		y->M_color = BLACK;
       		xpp->M_color = RED;
-          // newNode에 부모를 넣어줘서 다시 while문을 돌려줘서 조부모의 윗세대도 정리해준다.
-      		newNode = xpp;
+      		newNode = xpp; // newNode에 부모를 넣어줘서 다시 while문을 돌려줘서 조부모의 윗세대도 정리해준다.
 	      }
-  	    else // 부모의 형제까지 BLACK이거나 부모의 형제가 없다면
+  	    else // 부모의 형제까지 BLACK이거나 부모의 형제가 없다면 ==> Case 1
 	      {
   	    	if (newNode == newNode->M_parent->M_right) // 본인이 부모의 오른쪽 자식이라면
     		  {
@@ -423,37 +423,39 @@ namespace ft
     		    RB_tree_rotate_left(newNode, root); // 부모를 기준으로 좌회전을 한다.
     		  }
           else
-      		  newNode->M_parent->M_color = BLACK; // 부모의 색을 BLACK으로 만들고
+            newNode->M_parent->M_color = BLACK; // 부모의 색을 BLACK으로 만들고
       		xpp->M_color = RED; // 조부모의 색을 빨간색으로 바꿔준다.
-      		RB_tree_rotate_right(xpp, root);
+      		RB_tree_rotate_right(xpp, root); // 조부모를 기준으로 우회전을 한다.
 	      }
   	  }
     	else  // 본인의 부모가 xpp->M_right이고, 부모의 형제는 xpp->M_left이다.
   	  {
-  	    RB_tree_node_base* const y = xpp->M_left;
-  	    if (y && y->M_color == RED)
+  	    RB_tree_node_base* const y = xpp->M_left; // y는 부모의 형제
+  	    if (y && y->M_color == RED) // 부모의 형제의 색이 빨간색이라면 ==> Case 1
 	      {
-      		newNode->M_parent->M_color = BLACK;
-      		y->M_color = BLACK;
-      		xpp->M_color = RED;
-      		newNode = xpp;
+      		newNode->M_parent->M_color = BLACK; // 부모의 색을 검정색으로 칠하고
+      		y->M_color = BLACK; // 부모의 형제 색을 검정색으로 칠한다.
+      		xpp->M_color = RED; // 조부모의 색을 빨간색으로 칠하고
+      		newNode = xpp; // 부모까지 밸런싱했으므로 조부모로 올라가서 다시 리밸런싱한다.
 	      }
-  	    else
+  	    else // 부모의 형제의 색이 검정색이라면, ==> Case 2
 	      {
-  	    	if (newNode == newNode->M_parent->M_left)
+  	    	if (newNode == newNode->M_parent->M_left) // 본인이 부모의 왼쪽 자식이라면
     		  {
     		    newNode = newNode->M_parent;
-    		    RB_tree_rotate_right(newNode, root);
+    		    RB_tree_rotate_right(newNode, root); // 부모를 기준으로 우회전을 한다.
     		  }
-      		newNode->M_parent->M_color = BLACK;
-      		xpp->M_color = RED;
-      		RB_tree_rotate_left(xpp, root);
+          else // 본인이 부모의 오른쪽 자식이라면,
+      		  newNode->M_parent->M_color = BLACK; // 부모의 색을 검정색으로 칠한다.
+      		xpp->M_color = RED; // 조부모의 색을 빨간색으로 칠한다.
+      		RB_tree_rotate_left(xpp, root); // 조부모를 기준으로 좌회전을 한다.
 	      }
   	  }
     }
     root->M_color = BLACK;
   }
 
+  
   RB_tree_node_base*
     RB_tree_rebalance_for_erase(RB_tree_node_base* const target,
                                 RB_tree_node_base& header)
@@ -535,6 +537,13 @@ namespace ft
     }
     if (y->M_color != RED)
     {
+      /*                    삭제에서의 Rebalancing                     *\
+      *  삽입에서의 Rebalancing은 Case 1, 2로 나뉜다.
+      *  Case 1. 부모 노드가 레드인 데, 부모의 형제가 없거나 블랙일 때 => 회전
+      *  Case 2. 부모 노드가 레드인 데, 부모의 형제가 레드일 때 => 색상 변환
+      *  처리 이후, 다시한번 while문을 도는 데, 최악의 경우 O(log n)의 시간이 걸린다.
+      *  xpp: GP(Grand parent)
+      \*                                                            */
 	    while (x != root && (x == 0 || x->M_color == BLACK))
       {
         if (x == x_parent->M_left)
