@@ -241,7 +241,7 @@ namespace ft {
 			normal_iterator() : M_current(Iterator()) { }
 			explicit normal_iterator(const Iterator& i) : M_current(i) { }
 
-			// Allow iterator to const_iterator conversion
+			// Allow iterator to const_iterator conversion SFINAE를 이용
 			template <class Iter>
 				normal_iterator(const normal_iterator<Iter,
 					                typename enable_if<(ft::are_same<Iter, typename Container::pointer>::value),

@@ -455,168 +455,258 @@ namespace ft
     root->M_color = BLACK;
   }
 
-  
+  // https://ict-nroo.tistory.com/73
+  // successor 노드가 z 대신 삭제되고, z 노드는 successor 노드의 정보를 swap받는다.
   RB_tree_node_base*
-    RB_tree_rebalance_for_erase(RB_tree_node_base* const target,
+    RB_tree_rebalance_for_erase(RB_tree_node_base* const z,
                                 RB_tree_node_base& header)
   {
     RB_tree_node_base *& root = header.M_parent;
     RB_tree_node_base *& leftmost = header.M_left;
     RB_tree_node_base *& rightmost = header.M_right;
-    RB_tree_node_base* y = target;
+    RB_tree_node_base* y = z; // y가 successor가 된다
     RB_tree_node_base* x = 0;
     RB_tree_node_base* x_parent = 0;
 
-    if (y->M_left == 0)     // target has at most one non-null child. y == target.
-      x = y->M_right;     // x might be null.
-    else
-      if (y->M_right == 0)  // target has exactly one non-null child. y == target.
-	      x = y->M_left;    // x is not null.
-    else
-  	{
-  	  // target has two non-null children.  Set y to
-  	  y = y->M_right;   //   target's successor.  x might be null.
-  	  while (y->M_left != 0)
-  	    y = y->M_left;
-  	  x = y->M_right;
-  	}
-    if (y != target)
+    // 04 ~ 06 Successor 찾기 삭제 사전 작업
+    // x가 중요한 이유는 y가 계승자가 되어 삭제되었을 때
+    // y의 자식인 x가 미아상태가 되기 때문에 미리 저장해두고 처리하기 위함이다.
+    /** 
+     ** y의 왼쪽 자식이 NIL일 경우는
+     ** x에 y의 오른쪽 자식을 저장한다.
+     */
+    if (y->M_left == 0)     // z has at most one non-null child. y == z.
+      x = y->M_right;     // x might be null. // x가 successor가 되나?
+    else // (04) y의 왼쪽 자식이 null이 아니라면,
     {
-	    // relink y in place of target.  y is target's successor
-    	target->M_left->M_parent = y;
-    	y->M_left = target->M_left;
-    	if (y != target->M_right)
+      /* 
+      ** y의 오른쪽 자식이 NIL일 경우는
+      ** x에 y의 왼쪽 자식을 저장한다.
+      */
+      if (y->M_right == 0)  // z has exactly one non-null child. y == z.
+	      x = y->M_left;    // (05) y의 왼쪽 자식을 x로, x is not null.
+      else
+      {
+        /* 
+        ** y의 다음 순번 노드를 찾는 과정이다.
+        ** y의 오른쪽 자식에서 가장 왼쪽에 있는 노드가 y가 되고,
+        ** y에 오른쪽 자식이 있을 수도 있으므로 그 자식을 x로 저장한다.
+        */
+        // 여기서 z 얘기가 나오는 것은 아직까지는 y == z 이기 때문이다.
+        // z has two non-null children.  Set y to
+        y = y->M_right;   //   z's successor.  x might be null.
+        while (y->M_left != 0)
+          y = y->M_left;
+        x = y->M_right; // (06) y의 오른쪽 자식을 x로 저장한다.
+      }
+    }
+    
+    /* (13) 삭제하려는 노드 대신 successor를 삭제한 경우, y와 z가 다르기 때문에
+    **      successor y노드의 데이터를 카피해주는 작업이 필요하다
+    **      조건문 y != z에서 y의 데이터들을 z노드로 copy해주는 작업을 한다.
+    **      successor가 z의 값들을 받은 뒤 z대신 삭제된다.
+    */
+    if (y != z)
+    {  
+	    // relink y in place of z.  y is z's successor
+    	z->M_left->M_parent = y;
+    	y->M_left = z->M_left;
+    	if (y != z->M_right)
   	  {
   	    x_parent = y->M_parent;
   	    if (x) x->M_parent = y->M_parent;
   	    y->M_parent->M_left = x;   // y must be a child of M_left
-  	    y->M_right = target->M_right;
-  	    target->M_right->M_parent = y;
+  	    y->M_right = z->M_right;
+  	    z->M_right->M_parent = y;
   	  }
     	else
     	  x_parent = y;
-    	if (root == target)
+    	if (root == z)
     	  root = y;
-    	else if (target->M_parent->M_left == target)
-    	  target->M_parent->M_left = y;
+    	else if (z->M_parent->M_left == z)
+    	  z->M_parent->M_left = y;
     	else
-    	  target->M_parent->M_right = y;
-    	y->M_parent = target->M_parent;
-    	std::swap(y->M_color, target->M_color);
-    	y = target;
+    	  z->M_parent->M_right = y;
+    	y->M_parent = z->M_parent;
+    	std::swap(y->M_color, z->M_color);
+    	y = z;
     	// y now points to node to be actually deleted
     }
-    else
-    {                        // y == target
-    	x_parent = y->M_parent;
+    else // Successor 필요없이 본인이 삭제되면 되는 상황
+    {                        // y == z
+    	x_parent = y->M_parent; // (07)
     	if (x)
-    	  x->M_parent = y->M_parent;
-    	if (root == target)
-    	  root = x;
+    	  x->M_parent = y->M_parent; // (08)
+    	if (root == z)
+    	  root = x; // (09)
     	else
     	{
-        if (target->M_parent->M_left == target)
-    	    target->M_parent->M_left = x;
+        if (z->M_parent->M_left == z)
+    	    z->M_parent->M_left = x;
     	  else
-    	    target->M_parent->M_right = x;
+    	    z->M_parent->M_right = x;
       }
-	    if (leftmost == target)
+      /*
+      ** 만약 삭제될 노드 z가 Header에 기록된 leftmost or rightmost 였다면
+      ** leftmost, rightmost를 Header에 갱신해야한다.
+      */
+	    if (leftmost == z)
       {
-        if (target->M_right == 0)        // target->M_left must be null also
-    	    leftmost = target->M_parent;
-  	    else // makes leftmost == M_header if target == root
+        if (z->M_right == 0)        // z->M_left must be null also
+    	    leftmost = z->M_parent;
+  	    else // makes leftmost == M_header if z == root
   	      leftmost = RB_tree_node_base::S_minimum(x);
       }
-    	if (rightmost == target)
+    	if (rightmost == z)
       {
-        if (target->M_left == 0)         // target->M_right must be null also
-          rightmost = target->M_parent; // makes rightmost == M_header if target == root
-        else                      // x == target->M_left
+        if (z->M_left == 0)         // z->M_right must be null also
+          rightmost = z->M_parent; // makes rightmost == M_header if z == root
+        else                      // x == z->M_left
           rightmost = RB_tree_node_base::S_maximum(x);
       }
     }
-    if (y->M_color != RED)
+
+    /* 
+      만약 x가 루트노드이거나, x가 레드노드이라면 x를 BLACK으로 만들어주고 종료한다
+    */
+
+    if (y->M_color != RED) // y가 BLACK이었을 경우(이중 흑색 노드)
     {
       /*                    삭제에서의 Rebalancing                     *\
-      *  삽입에서의 Rebalancing은 Case 1, 2로 나뉜다.
-      *  Case 1. 부모 노드가 레드인 데, 부모의 형제가 없거나 블랙일 때 => 회전
-      *  Case 2. 부모 노드가 레드인 데, 부모의 형제가 레드일 때 => 색상 변환
-      *  처리 이후, 다시한번 while문을 도는 데, 최악의 경우 O(log n)의 시간이 걸린다.
-      *  xpp: GP(Grand parent)
+      *  삽입에서의 Rebalancing은 Case 1, 2, 3, 4, 5, 6, 7, 8로 나뉜다.
+      *  Case 1. x의 형제 노드 w가 RED인 경우
+      *  Case 2. w가 BLACK, w의 왼쪽, 오른쪽 자식이 BLACK인 경우
+      *  Case 3. w가 BLACK, w의 왼쪽 자식이 RED인 경우
+      *  Case 4. w가 BLACK, w의 오른쪽 자식이 RED인 경우
+      *  Case 5, 6, 7, 8. 은 Case 1,2,3,4의 대칭이다.
+      *  xpp: GP(Grand parent), w: x의 uncle
       \*                                                            */
 	    while (x != root && (x == 0 || x->M_color == BLACK))
       {
-        if (x == x_parent->M_left)
+        if (x == x_parent->M_left) // 본인이 왼쪽일 때
   	    {
-  	      RB_tree_node_base* w = x_parent->M_right;
+  	      RB_tree_node_base* w = x_parent->M_right; // w는 sibling
+          /**
+           * Case 1. w가 RED인 경우
+           * 이 경우는 x의 자식노드가 BLACK 노드이다.
+           * (1) w를 BLACK, p[x]를 RED
+           * (2) p[x]에 대해 left-rotation.
+           * (3) 이 때 w는 p[x]의 right가 되고, BLACK으로 칠한다. 이 때, p[x]가 RED로 된다.
+           **/
   	      if (w->M_color == RED)
       		{
-      		  w->M_color = BLACK;
-      		  x_parent->M_color = RED;
-      		  RB_tree_rotate_left(x_parent, root);
+      		  w->M_color = BLACK; // sibling black
+      		  x_parent->M_color = RED; // parent red (1)
+      		  RB_tree_rotate_left(x_parent, root); // (2)
       		  w = x_parent->M_right;
       		}
+          /**
+           * Case 2. w가 BLACK, w의 왼쪽, 오른쪽 자식이 BLACK인 경우
+           * (1) color[w] <- RED
+           * (2) x <- p[x]
+           * (3) 다시 while문
+           **/
   	      if ((w->M_left == 0 ||
         		   w->M_left->M_color == BLACK) &&
         		  (w->M_right == 0 ||
         		   w->M_right->M_color == BLACK))
       		{
-      		  w->M_color = RED;
-      		  x = x_parent;
-      		  x_parent = x_parent->M_parent;
+      		  w->M_color = RED; // (1)
+      		  x = x_parent; // (2)
+      		  x_parent = x_parent->M_parent; // (2)
+            // (3) 다시 while문
       		}
 	        else
 		      {
+            /**
+             * Case 3. w가 BLACK, w의 오른쪽 자식이 BLACK인 경우
+             * (1) w의 왼쪽자식을 BLACK
+             * (2) w의 색을 RED
+             * (3) w를 중심으로 우회전
+             * (4) w는 x의 부모의 새로운 오른쪽 자식노드가 되고 색은 RED인 상태가 된다
+             **/
       		  if (w->M_right == 0
       		      || w->M_right->M_color == BLACK)
     		    {
-    		      w->M_left->M_color = BLACK;
-    		      w->M_color = RED;
-    		      RB_tree_rotate_right(w, root);
-    		      w = x_parent->M_right;
+    		      w->M_left->M_color = BLACK; // (1)
+    		      w->M_color = RED; // (2)
+    		      RB_tree_rotate_right(w, root); // (3)
+    		      w = x_parent->M_right; // (4)
     		    }
-      		  w->M_color = x_parent->M_color;
-      		  x_parent->M_color = BLACK;
+            /**
+             * Case 4. w가 BLACK, w의 오른쪽 자식이 RED인 경우
+             * (5) left-rotate 대상인 두 노드의 색을 서로 교환
+             * (6) w의 오른쪽 자식 노드의 색을 BLACK
+             * (7) p[x]를 기준으로 left-rotate한다.
+             **/
+      		  w->M_color = x_parent->M_color; // (5)
+      		  x_parent->M_color = BLACK; // (5)
       		  if (w->M_right)
-      		    w->M_right->M_color = BLACK;
-      		  RB_tree_rotate_left(x_parent, root);
+      		    w->M_right->M_color = BLACK; // (6)
+      		  RB_tree_rotate_left(x_parent, root); // (7)
       		  break;
       		}
         }
         else
         {
-          // same as above, with M_right <-> M_left.
-          RB_tree_node_base* w = x_parent->M_left;
+          // x가 오른쪽일 때
+          RB_tree_node_base* w = x_parent->M_left; // sibling은 왼쪽
+          /**
+           * Case 5. w가 RED인 경우
+           * 이 경우는 x의 자식노드가 BLACK 노드이다.
+           * (1) w를 BLACK, p[x]를 RED
+           * (2) p[x]에 대해 right-rotation.
+           * (3) 이 때 w는 p[x]의 left가 되고, BLACK으로 칠한다. 이 때, p[x]가 RED로 된다.
+           **/
           if (w->M_color == RED)
           {
-            w->M_color = BLACK;
-            x_parent->M_color = RED;
-            RB_tree_rotate_right(x_parent, root);
-            w = x_parent->M_left;
+            w->M_color = BLACK; // (1)
+            x_parent->M_color = RED; // (1)
+            RB_tree_rotate_right(x_parent, root); // (2)
+            w = x_parent->M_left; // (3)
           }
+          /**
+           * Case 6. w가 BLACK, w의 왼쪽, 오른쪽 자식이 BLACK인 경우
+           * (1) color[w] <- RED
+           * (2) x <- p[x]
+           * (3) 다시 while문
+           **/
           if ((w->M_right == 0 ||
               w->M_right->M_color == BLACK) &&
               (w->M_left == 0 ||
               w->M_left->M_color == BLACK))
           {
-            w->M_color = RED;
-            x = x_parent;
-            x_parent = x_parent->M_parent;
+            w->M_color = RED; // (1)
+            x = x_parent; // (2)
+            x_parent = x_parent->M_parent; // (2)
           }
           else
           {
+            /**
+             * Case 7. w가 BLACK, w의 왼쪽 자식이 BLACK인 경우
+             * (1) w의 오른쪽자식을 BLACK
+             * (2) w의 색을 RED
+             * (3) w를 중심으로 좌회전
+             * (4) w는 x의 부모의 새로운 왼쪽 자식노드가 되고 색은 RED인 상태가 된다
+             **/
             if (w->M_left == 0 || w->M_left->M_color == BLACK)
             {
-              w->M_right->M_color = BLACK;
-              w->M_color = RED;
-              RB_tree_rotate_left(w, root);
-              w = x_parent->M_left;
+              w->M_right->M_color = BLACK; // (1)
+              w->M_color = RED; // (2)
+              RB_tree_rotate_left(w, root); // (3)
+              w = x_parent->M_left; // (4)
             }
-            w->M_color = x_parent->M_color;
-            x_parent->M_color = BLACK;
+            /**
+             * Case 8. w가 BLACK, w의 왼쪽 자식이 RED인 경우
+             * (5) right-rotate 대상인 w와 p[x] 색을 서로 교환
+             * (6) w의 오른쪽 자식 노드의 색을 BLACK
+             * (7) p[x]를 기준으로 left-rotate한다.
+             **/
+            w->M_color = x_parent->M_color; // (5)
+            x_parent->M_color = BLACK; // (5)
             if (w->M_left)
-              w->M_left->M_color = BLACK;
-            RB_tree_rotate_right(x_parent, root);
+              w->M_left->M_color = BLACK; // (6)
+            RB_tree_rotate_right(x_parent, root); // (7)
             break;
           }
         }
@@ -1035,62 +1125,7 @@ namespace ft
     ft::pair<const_iterator, const_iterator>
       equal_range(const key_type& x) const;
   };
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  inline bool
-    operator==(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x,
-	             const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
-  {
-    return x.size() == y.size()
-           && equal(x.begin(), x.end(), y.begin());
-  }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  inline bool
-    operator<(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x,
-              const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
-  {
-    return lexicographical_compare(x.begin(), x.end(),
-				                           y.begin(), y.end());
-  }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-         typename Compare, typename Alloc>
-  inline bool
-    operator!=(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x,
-	             const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
-  { return !(x == y); }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  inline bool
-    operator>(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x,
-	            const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
-  { return y < x; }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  inline bool
-    operator<=(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x,
-	             const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
-    { return !(y < x); }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  inline bool
-    operator>=(const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x,
-	             const RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
-    { return !(x < y); }
-
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  inline void
-    swap(RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& x,
-	       RB_tree<Key,Val,KeyOfValue,Compare,Alloc>& y)
-  { x.swap(y); }
-
+  
 
   //1
   template<typename Key, typename Val, typename KeyOfValue,
@@ -1193,15 +1228,13 @@ namespace ft
     std::swap(this->M_impl.M_node_count, t.M_impl.M_node_count);
     std::swap(this->M_impl.M_key_compare, t.M_impl.M_key_compare);
 
-    //   std::__alloc_swap<_Node_allocator>::
-    // _S_do_it(_M_get_Node_allocator(), __t._M_get_Node_allocator());
   }
 
   //2
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   ft::pair<typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator,
-                bool>
+                    bool>
   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   M_insert_unique(const Val& v)
   {
@@ -1224,7 +1257,7 @@ namespace ft
     }
     if (M_impl.M_key_compare(S_key(_tmp.M_node), KeyOfValue()(v)))
       return ft::pair<iterator,bool>(M_insert(_begin, _end, v), true);
-    return ft::pair<iterator,bool>(_tmp, false);
+    return ft::pair<iterator,bool>(_tmp, false); // 이미 동일한 v값이 있어 false로 pair를 리턴한다.
   }
 
   template<typename Key, typename Val, typename KeyOfValue,
@@ -1371,9 +1404,10 @@ namespace ft
     erase(const_iterator position)
   {
     Link_type y =
-      static_cast<Link_type>(RB_tree_rebalance_for_erase(
-                                                         const_cast<Base_ptr>(position.M_node),
-                                                                              this->M_impl.M_header));
+      static_cast<Link_type>(
+        RB_tree_rebalance_for_erase(
+                                    const_cast<Base_ptr>(position.M_node),
+                                                        this->M_impl.M_header));
     M_destroy_node(y);
     --M_impl.M_node_count;
   }
@@ -1601,7 +1635,7 @@ namespace ft
   inline
   ft::pair<typename RB_tree<Key,Val,KeyOfValue,
 		                    Compare,Alloc>::iterator,
-       typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator>
+           typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator>
   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   equal_range(const Key& k)
   { return ft::pair<iterator, iterator>(lower_bound(k), upper_bound(k)); }
@@ -1611,15 +1645,15 @@ namespace ft
   inline
   ft::pair<typename RB_tree<Key, Val, KoV,
 		                    Compare, Alloc>::const_iterator,
-	     typename RB_tree<Key, Val, KoV, Compare, Alloc>::const_iterator>
+	         typename RB_tree<Key, Val, KoV, Compare, Alloc>::const_iterator>
   RB_tree<Key, Val, KoV, Compare, Alloc>::
   equal_range(const Key& k) const
   { return ft::pair<const_iterator, const_iterator>(lower_bound(k),
-					                                      upper_bound(k)); }
+					                                          upper_bound(k)); }
 
   unsigned int
     RB_tree_black_count(const RB_tree_node_base* node,
-                         const RB_tree_node_base* root)
+                        const RB_tree_node_base* root)
   {
     if (node == 0)
       return 0;
@@ -1637,5 +1671,7 @@ namespace ft
     return sum;
   }
 }
+
+#include "tree_inline_operator.tcc"
 
 #endif
