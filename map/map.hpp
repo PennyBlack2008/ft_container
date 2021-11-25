@@ -16,7 +16,7 @@ namespace ft
   public:
     typedef Key                                          key_type;
     typedef T                                            mapped_type;
-    typedef ft::pair<const Key, T>                      value_type;
+    typedef ft::pair<const Key, T>                       value_type;
     typedef Compare                                      key_compare;
     typedef Alloc                                        allocator_type;
 
@@ -41,7 +41,7 @@ namespace ft
     };
 
   private:
-      /// @if maint  This turns a red-black tree into a [multi]map.  @endif
+      /// @if maint  This turns a red-black tree into a map.  @endif
       typedef typename Alloc::template rebind<value_type>::other 
         Pair_alloc_type;
 
@@ -127,7 +127,7 @@ namespace ft
     : M_t(comp, a)
     { M_t.M_insert_unique(first, last); }
 
-
+    
     /**
      *  @brief  Map assignment operator.
      *  @param  x  A %map of identical element and allocator types.
@@ -141,6 +141,9 @@ namespace ft
       M_t = x.M_t;
       return *this;
     }
+
+    ~map()
+    { }
 
     /// Get a copy of the memory allocation object.
     allocator_type
@@ -261,31 +264,31 @@ namespace ft
     }
 
     // _GLIBCXX_RESOLVE_LIB_DEFECTS
-      // DR 464. Suggestion for new member functions in standard containers.
-      /**
-       *  @brief  Access to %map data.
-       *  @param  k  The key for which data should be retrieved.
-       *  @return  A reference to the data whose key is equivalent to @a k, if
-       *           such a data is present in the %map.
-       *  @throw  std::out_of_range  If no such data is present.
-       */
-      mapped_type&
-      at(const key_type& k)
-      {
-        iterator i = lower_bound(k);
-        if (i == end() || key_comp()(k, (*i).first))
-          std::__throw_out_of_range("map::at");
-        return (*i).second;
-      }
+    // DR 464. Suggestion for new member functions in standard containers.
+    /**
+     *  @brief  Access to %map data.
+     *  @param  k  The key for which data should be retrieved.
+     *  @return  A reference to the data whose key is equivalent to @a k, if
+     *           such a data is present in the %map.
+     *  @throw  std::out_of_range  If no such data is present.
+     */
+    mapped_type&
+    at(const key_type& k)
+    {
+      iterator i = lower_bound(k);
+      if (i == end() || key_comp()(k, (*i).first))
+        std::__throw_out_of_range("map::at");
+      return (*i).second;
+    }
 
-      const mapped_type&
-      at(const key_type& k) const
-      {
-        const_iterator i = lower_bound(k);
-        if (i == end() || key_comp()(k, (*i).first))
-          std::__throw_out_of_range("map::at");
-        return (*i).second;
-      }
+    const mapped_type&
+    at(const key_type& k) const
+    {
+      const_iterator i = lower_bound(k);
+      if (i == end() || key_comp()(k, (*i).first))
+        std::__throw_out_of_range("map::at");
+      return (*i).second;
+    }
 
 
     // modifiers

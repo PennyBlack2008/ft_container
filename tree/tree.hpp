@@ -52,7 +52,7 @@ namespace ft
   template<typename Val>
   struct RB_tree_node : public RB_tree_node_base
   {
-    typedef RB_tree_node<Val>*  Link_type;
+    typedef RB_tree_node<Val>*  Link_type; // 다음 노드
     Val                         M_value_field;
   };
 
@@ -139,7 +139,7 @@ namespace ft
   }
 
   const RB_tree_node_base*
-  RB_tree_decrement(const RB_tree_node_base* x)
+    RB_tree_decrement(const RB_tree_node_base* x)
   {
     return RB_tree_decrement(const_cast<RB_tree_node_base*>(x));
   }
@@ -147,16 +147,16 @@ namespace ft
   template<typename T>
   struct RB_tree_iterator
   {
-    typedef T value_type;
-    typedef T& reference;
-    typedef T* pointer;
+    typedef T     value_type;
+    typedef T&    reference;
+    typedef T*    pointer;
 
-    typedef std::bidirectional_iterator_tag iterator_category;
-    typedef ptrdiff_t difference_type;
+    typedef std::bidirectional_iterator_tag   iterator_category;
+    typedef ptrdiff_t                         difference_type;
 
-    typedef RB_tree_iterator<T> Self;
-    typedef RB_tree_node_base::Base_ptr Base_ptr;
-    typedef RB_tree_node<T>* Link_type;
+    typedef RB_tree_iterator<T>           Self;
+    typedef RB_tree_node_base::Base_ptr   Base_ptr;
+    typedef RB_tree_node<T>*              Link_type;
 
     RB_tree_iterator()
       : M_node() { }
@@ -214,14 +214,14 @@ namespace ft
   template<typename T>
   struct RB_tree_const_iterator
   {
-    typedef T         value_type;
-    typedef const T&  reference;
-    typedef const T*  pointer;
+    typedef T                          value_type;
+    typedef const T&                   reference;
+    typedef const T*                   pointer;
 
-    typedef RB_tree_iterator<T> iterator;
+    typedef RB_tree_iterator<T>                 iterator;
 
-    typedef std::bidirectional_iterator_tag iterator_category;
-    typedef ptrdiff_t                       difference_type;
+    typedef std::bidirectional_iterator_tag     iterator_category;
+    typedef ptrdiff_t                           difference_type;
 
     typedef RB_tree_const_iterator<T>           Self;
     typedef RB_tree_node_base::Const_Base_ptr   Base_ptr;
@@ -724,22 +724,22 @@ namespace ft
             Node_allocator;
 
   protected:
-    typedef RB_tree_node_base* Base_ptr;
-    typedef const RB_tree_node_base* Const_Base_ptr;
-    typedef RB_tree_node<Val> RB_tree_node;
+    typedef RB_tree_node_base*        Base_ptr;
+    typedef const RB_tree_node_base*  Const_Base_ptr;
+    typedef RB_tree_node<Val>         RB_tree_node;
 
   public:
-    typedef Key key_type;
-    typedef Val value_type;
-    typedef value_type* pointer;
-    typedef const value_type* const_pointer;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
-    typedef RB_tree_node* Link_type;
-    typedef const RB_tree_node* Const_Link_type;
-    typedef size_t size_type;
-    typedef ptrdiff_t difference_type;
-    typedef Alloc allocator_type;
+    typedef Key                       key_type;
+    typedef Val                       value_type;
+    typedef value_type*               pointer;
+    typedef const value_type*         const_pointer;
+    typedef value_type&               reference;
+    typedef const value_type&         const_reference;
+    typedef RB_tree_node*             Link_type;
+    typedef const RB_tree_node*       Const_Link_type;
+    typedef size_t                    size_type;
+    typedef ptrdiff_t                 difference_type;
+    typedef Alloc                     allocator_type;
 
     Node_allocator&
       M_get_Node_allocator()
@@ -820,9 +820,9 @@ namespace ft
     template<typename Key_compare>
     struct RB_tree_impl<Key_compare, true> : public Node_allocator
     {
-      Key_compare M_key_compare;
-      RB_tree_node_base M_header;
-      size_type M_node_count; // Keeps track of size of tree.
+      Key_compare         M_key_compare;
+      RB_tree_node_base   M_header;
+      size_type           M_node_count; // Keeps track of size of tree.
 
       RB_tree_impl()
       : Node_allocator(), M_key_compare(), M_header(), M_node_count(0)
@@ -887,6 +887,7 @@ namespace ft
       M_end() const
     { return static_cast<Const_Link_type>(&this->M_impl.M_header); }
 
+    // pair에서 value를 반환
     static const_reference
       S_value(Const_Link_type x)
     { return x->M_value_field; }
@@ -980,6 +981,8 @@ namespace ft
   	  }
     }
 
+    /* map에 소멸자가 없는 이유가 map은 껍데기일 뿐이고, 
+       알맹이인 tree에서 소멸시켜주기 때문 */
     ~RB_tree()
     { M_erase(M_begin()); }
 
@@ -988,16 +991,17 @@ namespace ft
     {
       if (this != &x)
       {
-					clear();
-					M_impl.M_key_compare = x.M_impl.M_key_compare;
-					if (x.M_root() != 0) {
-						M_root() = M_copy(x.M_begin(), M_end());
-						M_leftmost() = S_minimum(M_root());
-						M_rightmost() = S_maximum(M_root());
-						M_impl.M_node_count = x.M_impl.M_node_count;
-					}
-				}
-				return *this;
+        clear(); // 기존 데이터 삭제
+        M_impl.M_key_compare = x.M_impl.M_key_compare;
+        if (x.M_root() != 0)
+        {
+          M_root() = M_copy(x.M_begin(), M_end());
+          M_leftmost() = S_minimum(M_root());
+          M_rightmost() = S_maximum(M_root());
+          M_impl.M_node_count = x.M_impl.M_node_count;
+        }
+      }
+      return *this;
     }
 
     // Accessors.
@@ -1127,7 +1131,7 @@ namespace ft
   };
   
 
-  //1
+  // p는 parent, Base_ptr에 0을 넣으면 insert_left를 0으로 하려는 의도다.
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
@@ -1142,7 +1146,7 @@ namespace ft
 					                                       S_key(p));
 
     RB_tree_insert_and_rebalance(insert_left, z, p,
-			    this->M_impl.M_header);
+			                           this->M_impl.M_header); // v가 안들어가네?->새로운 z노드안에 있음
     ++M_impl.M_node_count;
     return iterator(z);
   }
@@ -1230,7 +1234,10 @@ namespace ft
 
   }
 
-  //2
+  // std::map::insert
+  // single element (1) pair<iterator, bool> insert(const value_type& val);
+  // Compare는 map에서 default값으로 std::less로 되어있다. (오름차순으로 정렬)
+  // 가장 기본적인 insert로 iterator 처음부터 v값이 들어갈 곳을 찾는다.
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   ft::pair<typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator,
@@ -1260,62 +1267,69 @@ namespace ft
     return ft::pair<iterator,bool>(_tmp, false); // 이미 동일한 v값이 있어 false로 pair를 리턴한다.
   }
 
+  // std::map::insert
+  // with hint (2) iterator insert(iterator position, const value_type& val);
+  // Compare의 default는 std::less
+  // 최대한 position 앞, 뒤로 v값의 적절한 위치를 찾고 앞, 뒤에도 없으면 최적화 의미 없이 노가다로 삽입할 곳 찾는다.
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   M_insert_unique(iterator position, const Val& v)
   {
+    // 주어진 position이 끝 iterator 였다면? 맨 앞이거나, 맨 뒤일 것이다.
     if (position.M_node == M_end())
 	  {
-	    // begin()
-	    if (size() > 0
+	    if (size() > 0 // tree가 비어있지 않고
 	        && M_impl.M_key_compare(S_key(M_rightmost()), 
-					KeyOfValue()(v)))
-	      return M_insert(0, M_rightmost(), v);
+					                        KeyOfValue()(v))) // v의 값이 트리에서 가장 큰값이라면
+	      return M_insert(0, M_rightmost(), v); // 0을 넣으면 트리의 오른쪽에 새 노드를 넣는다.
+        // 트리에 새로운 가장 큰 값이 들어가므로 예전 큰 값을 부모로해서 예전 큰 값의 오른쪽 자식으로 새 노드가 들어간다.
   	  else // First argument just needs to be non-null.
-	      return M_insert_unique(v).first;
+	      return M_insert_unique(v).first; // tree가 비어있거나 position이 더 큰 경우(최적화 도움안됨)
 	  }
     else if (M_impl.M_key_compare(KeyOfValue()(v),
-				                          S_key(position.M_node)))
+				                          S_key(position.M_node))) // v < position
 	  {
 	    // First, try before...
       iterator before = position;
       if (position.M_node == M_leftmost()) // begin()
-        return M_insert(M_leftmost(), M_leftmost(), v);
+        return M_insert(M_leftmost(), M_leftmost(), v); // 가장 왼쪽에 있는 케이스일 때
       else if (M_impl.M_key_compare(S_key((--before).M_node), 
-                                    KeyOfValue()(v)))
+                                          KeyOfValue()(v))) // position의 이전 노드 < v
       {
-        if (S_right(before.M_node) == 0)
+        if (S_right(before.M_node) == 0) // 이전 노드의 오른쪽 노드 자리가 비었을 때
           return M_insert(0, before.M_node, v);
         else
           return M_insert(position.M_node,
-                          position.M_node, v);
+                          position.M_node, v); // 그게 아니라면, position의 왼쪽 자식에 넣는다.
       }
       else
-        return M_insert_unique(v).first;
+        return M_insert_unique(v).first; // 기존 노가다 방식
   	}
     else if (M_impl.M_key_compare(S_key(position.M_node),
-				                          KeyOfValue()(v)))
+				                          KeyOfValue()(v))) // position < v 일 때
     {
       iterator after = position;
-      if (position.M_node == M_rightmost())
+      if (position.M_node == M_rightmost()) // position이 가장 오른쪽이면,
         return M_insert(0, M_rightmost(), v);
       else if (M_impl.M_key_compare(KeyOfValue()(v),
-                                    S_key((++after).M_node)))
+                                    S_key((++after).M_node))) // v < ++after
       {
-        if (S_right(position.M_node) == 0)
+        if (S_right(position.M_node) == 0) // position의 오른쪽 자식이 비었다면
           return M_insert(0, position.M_node, v);
         else
           return M_insert(after.M_node, after.M_node, v);
       }
-      else
+      else // Position 근처에 없다면, 노가다
         return M_insert_unique(v).first;
     }
     else
       return position; // Equivalent keys.
   }
 
+  // std::map::insert
+  // with hint (2) iterator insert(const_iterator position, const value_type& val);
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::const_iterator
@@ -1373,6 +1387,9 @@ namespace ft
 	    return position; // Equivalent keys.
   }
 
+  // std::map::insert
+  // range (3) template<class InputIterator>
+  //           void insert(InputIterator first, InputIterator last);
   template<typename Key, typename Val, typename KoV,
            typename Cmp, typename Alloc>
   template<class II>
@@ -1586,10 +1603,12 @@ namespace ft
     Const_Link_type y = M_end(); // Last node which is not less than k.
 
     while (x != 0)
+    {
       if (!M_impl.M_key_compare(S_key(x), k))
         y = x, x = S_left(x);
       else
         x = S_right(x);
+    }
 
     return const_iterator(y);
   }
@@ -1604,10 +1623,12 @@ namespace ft
     Link_type y = M_end(); // Last node which is greater than k.
 
     while (x != 0)
+    {
       if (M_impl.M_key_compare(k, S_key(x)))
         y = x, x = S_left(x);
       else
         x = S_right(x);
+    }
 
     return iterator(y);
   }
@@ -1622,10 +1643,12 @@ namespace ft
     Const_Link_type y = M_end(); // Last node which is greater than k.
 
     while (x != 0)
-    	if (M_impl.M_key_compare(k, S_key(x)))
+    {
+      if (M_impl.M_key_compare(k, S_key(x)))
     	  y = x, x = S_left(x);
     	else
     	  x = S_right(x);
+    }
 
     return const_iterator(y);
   }
