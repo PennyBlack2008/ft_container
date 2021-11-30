@@ -824,6 +824,12 @@ namespace ft
       RB_tree_node_base   M_header;
       size_type           M_node_count; // Keeps track of size of tree.
 
+      /** M_impl
+       * M_header의 M_color는 항상 RED이다.
+       * M_header.M_parent는 0으로 초기화, 본래는 root node를 가리키게 된다.
+       * M_header.M_left는 본인을 가리키도록 초기화, 본래는 leftmost node를 가리키게 된다.
+       * M_header.M_right는 본인을 가리키도록 초기화, 본래는 rightmost node를 가리키게 된다.
+       **/
       RB_tree_impl()
       : Node_allocator(), M_key_compare(), M_header(), M_node_count(0)
       {
@@ -947,8 +953,8 @@ namespace ft
     iterator
       M_insert(Base_ptr x, Base_ptr y, const value_type& v);
 
-    iterator
-      M_insert_lower(Base_ptr x, Base_ptr y, const value_type& v);
+    // iterator
+    //   M_insert_lower(Base_ptr x, Base_ptr y, const value_type& v);
 
     const_iterator
       M_insert(Const_Base_ptr x, Const_Base_ptr y, const value_type& v);
@@ -1059,9 +1065,6 @@ namespace ft
     // Insert/erase.
     ft::pair<iterator,bool>
       M_insert_unique(const value_type& x);
-
-    // _GLIBCXX_RESOLVE_LIB_DEFECTS
-    // 233. Insertion hints in associative containers.
     
     iterator
       M_insert_unique(iterator position, const value_type& x);
@@ -1151,23 +1154,23 @@ namespace ft
     return iterator(z);
   }
 
-  template<typename Key, typename Val, typename KeyOfValue,
-           typename Compare, typename Alloc>
-  typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  M_insert_lower(Base_ptr x, Base_ptr p, const Val& v)
-  {
-    bool insert_left = (x != 0 || p == M_end()
-                        || !M_impl.M_key_compare(S_key(p),
-                                                 KeyOfValue()(v)));
+  // template<typename Key, typename Val, typename KeyOfValue,
+  //          typename Compare, typename Alloc>
+  // typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
+  // RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
+  // M_insert_lower(Base_ptr x, Base_ptr p, const Val& v)
+  // {
+  //   bool insert_left = (x != 0 || p == M_end()
+  //                       || !M_impl.M_key_compare(S_key(p),
+  //                                                KeyOfValue()(v)));
 
-    Link_type z = M_create_node(v);
+  //   Link_type z = M_create_node(v);
 
-    RB_tree_insert_and_rebalance(insert_left, z, p,  
-                                 this->M_impl.M_header);
-    ++M_impl.M_node_count;
-    return iterator(z);
-  }
+  //   RB_tree_insert_and_rebalance(insert_left, z, p,  
+  //                                this->M_impl.M_header);
+  //   ++M_impl.M_node_count;
+  //   return iterator(z);
+  // }
 
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
@@ -1234,10 +1237,10 @@ namespace ft
 
   }
 
-  // std::map::insert
-  // single element (1) pair<iterator, bool> insert(const value_type& val);
-  // Compare는 map에서 default값으로 std::less로 되어있다. (오름차순으로 정렬)
-  // 가장 기본적인 insert로 iterator 처음부터 v값이 들어갈 곳을 찾는다.
+  /* std::map::insert
+  ** single element (1) pair<iterator, bool> insert(const value_type& val);
+  ** Compare는 map에서 default값으로 std::less로 되어있다. (오름차순으로 정렬)
+  ** 가장 기본적인 insert로 iterator 처음부터 v값이 들어갈 곳을 찾는다. */
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   ft::pair<typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator,
@@ -1267,17 +1270,17 @@ namespace ft
     return ft::pair<iterator,bool>(_tmp, false); // 이미 동일한 v값이 있어 false로 pair를 리턴한다.
   }
 
-  // std::map::insert
-  // with hint (2) iterator insert(iterator position, const value_type& val);
-  // Compare의 default는 std::less
-  // 최대한 position 앞, 뒤로 v값의 적절한 위치를 찾고 앞, 뒤에도 없으면 최적화 의미 없이 노가다로 삽입할 곳 찾는다.
+  /* std::map::insert
+  ** with hint (2) iterator insert(iterator position, const value_type& val);
+  ** Compare의 default는 std::less
+  ** v값이 주어진 position의 이전 또는 다음 노드에 위치해야 하는 데, 그렇지 않으면 더 효율이 떨어진다. */
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   M_insert_unique(iterator position, const Val& v)
   {
-    // 주어진 position이 끝 iterator 였다면? 맨 앞이거나, 맨 뒤일 것이다.
+    // 주어진 position이 header(끝 iterator) 였다면? 맨 앞이거나, 맨 뒤일 것이다.
     if (position.M_node == M_end())
 	  {
 	    if (size() > 0 // tree가 비어있지 않고
@@ -1314,7 +1317,7 @@ namespace ft
       if (position.M_node == M_rightmost()) // position이 가장 오른쪽이면,
         return M_insert(0, M_rightmost(), v);
       else if (M_impl.M_key_compare(KeyOfValue()(v),
-                                    S_key((++after).M_node))) // v < ++after
+                                    S_key((++after).M_node))) // v < after
       {
         if (S_right(position.M_node) == 0) // position의 오른쪽 자식이 비었다면
           return M_insert(0, position.M_node, v);
@@ -1328,8 +1331,8 @@ namespace ft
       return position; // Equivalent keys.
   }
 
-  // std::map::insert
-  // with hint (2) iterator insert(const_iterator position, const value_type& val);
+  /* std::map::insert
+  ** with hint (2) iterator insert(const_iterator position, const value_type& val); */
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::const_iterator
@@ -1360,7 +1363,7 @@ namespace ft
             return M_insert(0, before.M_node, v);
           else
             return M_insert(position.M_node,
-          position.M_node, v);
+                            position.M_node, v);
         }
       else
         return const_iterator(M_insert_unique(v).first);
@@ -1387,9 +1390,9 @@ namespace ft
 	    return position; // Equivalent keys.
   }
 
-  // std::map::insert
-  // range (3) template<class InputIterator>
-  //           void insert(InputIterator first, InputIterator last);
+  /* std::map::insert
+  ** range (3) template<class InputIterator>
+  **           void insert(InputIterator first, InputIterator last); */
   template<typename Key, typename Val, typename KoV,
            typename Cmp, typename Alloc>
   template<class II>
@@ -1401,11 +1404,16 @@ namespace ft
       M_insert_unique(end(), *first);
   }
 
-  //4
+  /* std::map::erase
+  ***/
+
+  /*
+  ** (1) void erase (iterator position); */
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   inline void
-    RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::erase(iterator position)
+    RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
+  erase(iterator position)
   {
     Link_type y =
       static_cast<Link_type>(RB_tree_rebalance_for_erase(position.M_node,
@@ -1418,7 +1426,7 @@ namespace ft
            typename Compare, typename Alloc>
   inline void
     RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-    erase(const_iterator position)
+  erase(const_iterator position)
   {
     Link_type y =
       static_cast<Link_type>(
@@ -1429,10 +1437,13 @@ namespace ft
     --M_impl.M_node_count;
   }
 
+  /*
+  ** (2) size_type erase (const key_type& k); 
+  ** 반환값은 삭제된 노드의 숫자를 반환한다. */
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::size_type
-  RB_tree<Key, Val, KeyOfValue, Compare, Alloc>::
+  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   erase(const Key& x)
   {
     ft::pair<iterator, iterator> p = equal_range(x);
@@ -1441,36 +1452,6 @@ namespace ft
     return old_size - size();
   }
 
-  template<typename Key, typename Val, typename KoV,
-           typename Compare, typename Alloc>
-  typename RB_tree<Key,Val, KoV, Compare, Alloc>::Link_type
-  RB_tree<Key,Val,KoV,Compare,Alloc>::
-  M_copy(Const_Link_type x, Link_type p)
-  {
-    // Structural copy.  x and p must be non-null.
-    Link_type top = M_clone_node(x);
-    top->M_parent = p;
-
-    if (x->M_right)
-      top->M_right = M_copy(S_right(x), top);
-    p = top;
-    x = S_left(x);
-
-    while (x != 0)
-    {
-      Link_type y = M_clone_node(x);
-      p->M_left = y;
-      y->M_parent = p;
-      if (x->M_right)
-        y->M_right = M_copy(S_right(x), y);
-      p = y;
-      x = S_left(x);
-    }
-
-    return top;
-  }
-
-  //5
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   void
@@ -1487,13 +1468,15 @@ namespace ft
   	}
   }
 
+  /*
+  ** (3) void erase(iterator first, iterator last) */
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   void
     RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   erase(iterator first, iterator last)
   {
-    if (first == begin() && last == end())
+    if (first == begin() && last == end()) // 전체를 지우는 거면 clear
 	    clear();
     else
 	    while (first != last) erase(first++);
@@ -1518,6 +1501,35 @@ namespace ft
   erase(const Key* first, const Key* last)
   {
     while (first != last) erase(*first++);
+  }
+
+  template<typename Key, typename Val, typename KoV,
+           typename Compare, typename Alloc>
+  typename RB_tree<Key,Val,KoV,Compare,Alloc>::Link_type
+  RB_tree<Key,Val,KoV,Compare,Alloc>::
+  M_copy(Const_Link_type x, Link_type p)
+  {
+    // Structural copy.  x and p must be non-null.
+    Link_type top = M_clone_node(x);
+    top->M_parent = p;
+
+    if (x->M_right)
+      top->M_right = M_copy(S_right(x), top);
+    p = top;
+    x = S_left(x);
+
+    while (x != 0)
+    {
+      Link_type y = M_clone_node(x);
+      p->M_left = y;
+      y->M_parent = p;
+      if (x->M_right)
+        y->M_right = M_copy(S_right(x), y);
+      p = y;
+      x = S_left(x);
+    }
+
+    return top;
   }
 
   template<typename Key, typename Val, typename KeyOfValue,
@@ -1563,7 +1575,8 @@ namespace ft
 	          || M_impl.M_key_compare(k, S_key(j.M_node))) ? end() : j;
   }
 
-  //6
+  /* count
+  **/
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::size_type
@@ -1575,17 +1588,24 @@ namespace ft
     return n;
   }
 
+  /* lower_bound, upper_bound
+  ** - lower_bound는 k값을 받고 그 k값과 동일하거나 더 큰 첫번째 iterator를 반환
+  **   - 만약 k값에 해당되는 iter가 없다면 예외처리가 없어 segment-fault
+  ** - upper_bound는 k값을 받고 그 k값 이후의 iterator를 반환(동일하면 안됨)
+  **   - 만약 k값에 해당되는 iter가 없다면 end iterator(헤더노드 iter)를 반환
+  **/
+
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   lower_bound(const Key& k)
   {
-    Link_type x = M_begin(); // Current node.
-    Link_type y = M_end(); // Last node which is not less than k.
+    Link_type x = M_begin(); // root node를 가리킴
+    Link_type y = M_end(); // header node를 가리킴
 
     while (x != 0)
-      if (!M_impl.M_key_compare(S_key(x), k))
+      if (!M_impl.M_key_compare(S_key(x), k)) // x >= k
         y = x, x = S_left(x);
       else
         x = S_right(x);
@@ -1599,7 +1619,7 @@ namespace ft
   RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   lower_bound(const Key& k) const
   {
-    Const_Link_type x = M_begin(); // Current node.
+    Const_Link_type x = M_begin(); // root node부터 탐색
     Const_Link_type y = M_end(); // Last node which is not less than k.
 
     while (x != 0)
@@ -1624,7 +1644,7 @@ namespace ft
 
     while (x != 0)
     {
-      if (M_impl.M_key_compare(k, S_key(x)))
+      if (M_impl.M_key_compare(k, S_key(x))) // k < x
         y = x, x = S_left(x);
       else
         x = S_right(x);
@@ -1652,7 +1672,9 @@ namespace ft
 
     return const_iterator(y);
   }
-  //7
+
+  /* equal_range
+  **/
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   inline

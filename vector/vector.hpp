@@ -15,8 +15,8 @@ namespace ft {
     template<typename T, typename Alloc>
     struct Vector_base {
         typedef typename Alloc::template rebind<T>::other T_alloc_type;
-        typedef typename	Alloc::pointer	            		pointer;
-		    typedef typename	Alloc::const_pointer	          const_pointer;
+        typedef typename Alloc::pointer	            		pointer;
+		    typedef typename Alloc::const_pointer	          const_pointer;
         /* Vector_impl 구조체는 container의 기초적인 3개의 멤버변수를 초기화해서 Vector에서 사용할 수 있도록 준비해놓는다. */
         struct Vector_impl : public T_alloc_type {
             T*      M_start; // 메모리의 시작점
