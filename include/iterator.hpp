@@ -11,27 +11,30 @@ namespace ft {
 	iterator_traits
 	-------------*/
 	template <class Iterator>
-	struct iterator_traits {
+	struct iterator_traits
+	{
 		typedef typename Iterator::difference_type		difference_type;
-		typedef typename Iterator::value_type			value_type;
-		typedef typename Iterator::pointer				pointer;
-		typedef typename Iterator::reference			reference;
+		typedef typename Iterator::value_type					value_type;
+		typedef typename Iterator::pointer						pointer;
+		typedef typename Iterator::reference					reference;
 		typedef typename Iterator::iterator_category	iterator_category;
 	};
 
 	template <class T>
-	struct iterator_traits<T*> {
+	struct iterator_traits<T*>
+	{
 		typedef ptrdiff_t							difference_type;
-		typedef T									value_type;
-		typedef T*									pointer;
-		typedef T&									reference;
+		typedef T											value_type;
+		typedef T*										pointer;
+		typedef T&										reference;
 		typedef std::random_access_iterator_tag		iterator_category;
 	};
 
 	template <class T>
-	struct iterator_traits<const T*> {
+	struct iterator_traits<const T*>
+	{
 		typedef ptrdiff_t							difference_type;
-		typedef T									value_type;
+		typedef T											value_type;
 		typedef const T*							pointer;
 		typedef const T&							reference;
 		typedef std::random_access_iterator_tag		iterator_category;
@@ -43,10 +46,10 @@ namespace ft {
 	template <class Iterator>
 	class reverse_iterator :
 		public std::iterator<typename iterator_traits<Iterator>::iterator_category,
-						 	 typename iterator_traits<Iterator>::value_type,
-							 typename iterator_traits<Iterator>::difference_type,
-							 typename iterator_traits<Iterator>::pointer,
-							 typename iterator_traits<Iterator>::reference>
+												 typename iterator_traits<Iterator>::value_type,
+												 typename iterator_traits<Iterator>::difference_type,
+												 typename iterator_traits<Iterator>::pointer,
+												 typename iterator_traits<Iterator>::reference>
 		{
 		protected:
 			/* current는 해당 컨테이너의 정방향 iterator에서 받은 값 그대로의 base()상태 */
@@ -64,27 +67,38 @@ namespace ft {
 			reverse_iterator() : M_current() {}
 			explicit reverse_iterator(Iterator x) : M_current(x) {}
 			reverse_iterator(const reverse_iterator& x) : M_current(x.M_current) {}
+			
 			template <class Iter> // NOTE: 왜 그냥 Iter일까?
 			reverse_iterator(const reverse_iterator<Iter>& x) : M_current(x.base()) {}
+			
 			template <class Iter>
-			reverse_iterator& operator=(const reverse_iterator<Iter>& x) {
+			reverse_iterator&
+				operator=(const reverse_iterator<Iter>& x)
+			{
 				M_current = x.base();
 				return *this;
 			}
 			/* @base reverse_iterator에서 기본 반복기를 복구합니다. */
-			iterator_type		base() const {
+			iterator_type
+				base() const
+			{
 				return M_current;
 			}
+			
 			/* @operator* reverse_iterator가 주소를 지정하는 요소를 반환합니다.
 			--를 하는 이유는 reverse_iterator의 until은 정방향 from -1의 위치와 같다
 			(정방향과 다르게 NULL로 시작해서 끝값으로 끝난다) 그 반대로 reverse_iterator의 from은 정방향 until -1의 위치와 같다.
 			*/
-			reference			operator*() const {
+			reference
+				operator*() const
+			{
 				iterator_type	temp = M_current;
 				return *--temp;
 			}
 			/* @operator-> reverse_iterator가 주소 지정하는 요소로 포인터를 반환합니다. */
-			pointer				operator->() const {
+			pointer
+				operator->() const
+			{
 				return &(operator*());
 			}
 			/* @&operator++ reverse_iterator를 이전 요소로 증가시킵니다. */
@@ -207,21 +221,21 @@ namespace ft {
 
   	template<typename IteratorL, typename IteratorR>
     inline bool operator>(const reverse_iterator<IteratorL>& x, const reverse_iterator<IteratorR>& y) {
-		return y.base() < x.base();
+		return y < x;
 	}
 
   	template<typename IteratorL, typename IteratorR>
     inline bool operator<=(const reverse_iterator<IteratorL>& x, const reverse_iterator<IteratorR>& y) {
-		return !(y.base() < x.base());
+		return !(y < x);
 	}
 
   	template<typename IteratorL, typename IteratorR>
     inline bool operator>=(const reverse_iterator<IteratorL>& x, const reverse_iterator<IteratorR>& y) {
-		return !(x.base() < y.base());
+		return !(x < y);
 	}
 
   	template<typename IteratorL, typename IteratorR>
-	inline typename reverse_iterator<IteratorL>::difference_type operator-(const reverse_iterator<IteratorL>& x, const reverse_iterator<IteratorR>& y) {
+		inline typename reverse_iterator<IteratorL>::difference_type operator-(const reverse_iterator<IteratorL>& x, const reverse_iterator<IteratorR>& y) {
 		return y.base() - x.base();
 	}
 
