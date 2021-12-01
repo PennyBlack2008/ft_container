@@ -86,10 +86,7 @@ namespace ft
         x = y;
         y = y->M_parent;
       }
-      /*
-      *  예외처리: x가 header일 때를 위한 조건문
-      */
-      if (x->M_right != y) 
+      if (x->M_right != y)
         x = y;
     }
     return x;
@@ -362,6 +359,7 @@ namespace ft
     RB_tree_node_base *& root = header.M_parent;
 
     // Initialize fields in new node to insert.
+    // 기본적으로 제공되는 새로운 노드는 빨간색
     newNode->M_parent = parent;
     newNode->M_left = 0;
     newNode->M_right = 0;
@@ -980,7 +978,7 @@ namespace ft
     {
     	if (x.M_root() != 0)
   	  {
-  	    M_root() = M_copy(x.M_begin(), M_end());
+  	    M_root() = M_copy(x.M_begin(), M_end()); // 복사될 원본 x의 루트와 붙혀넣기할 헤더
   	    M_leftmost() = S_minimum(M_root());
   	    M_rightmost() = S_maximum(M_root());
   	    M_impl.M_node_count = x.M_impl.M_node_count;
@@ -1277,7 +1275,7 @@ namespace ft
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
+    RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   M_insert_unique(iterator position, const Val& v)
   {
     // 주어진 position이 header(끝 iterator) 였다면? 맨 앞이거나, 맨 뒤일 것이다.
@@ -1506,13 +1504,12 @@ namespace ft
   template<typename Key, typename Val, typename KoV,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KoV,Compare,Alloc>::Link_type
-  RB_tree<Key,Val,KoV,Compare,Alloc>::
+    RB_tree<Key,Val,KoV,Compare,Alloc>::
   M_copy(Const_Link_type x, Link_type p)
   {
     // Structural copy.  x and p must be non-null.
     Link_type top = M_clone_node(x);
     top->M_parent = p;
-
     if (x->M_right)
       top->M_right = M_copy(S_right(x), top);
     p = top;
@@ -1532,10 +1529,13 @@ namespace ft
     return top;
   }
 
+  /**
+   * find
+   * 찾으면 해당 k값에 해당되는 iterator를 반환. 없으면 end()반환 **/
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
+    RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   find(const Key& k)
   {
     Link_type x = M_begin(); // Current node.
@@ -1543,7 +1543,7 @@ namespace ft
 
     while (x != 0)
     {
-      if (!M_impl.M_key_compare(S_key(x), k))
+      if (!M_impl.M_key_compare(S_key(x), k)) // x >= k
         y = x, x = S_left(x);
       else
         x = S_right(x);
@@ -1557,7 +1557,7 @@ namespace ft
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::const_iterator
-  RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
+    RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
   find(const Key& k) const
   {
     Const_Link_type x = M_begin(); // Current node.
