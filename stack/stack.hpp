@@ -30,7 +30,6 @@ namespace ft
     public:
         explicit stack(const container_type& c = container_type())
             : c(c) {}
-
         bool empty() const { return c.empty(); }
         size_type size() const { return c.size(); }
         reference top() { return c.back(); }
@@ -38,6 +37,7 @@ namespace ft
         void push(const value_type& x) { c.push_back(x); }
         void pop() { c.pop_back(); }
     };
+
     /**
      *  @brief  Stack equality comparison.
      *  @param  x  A %stack.
@@ -73,25 +73,25 @@ namespace ft
     operator<(const stack<T, Container>& x, const stack<T, Container>& y)
     { return x.c < y.c; }
 
-    /// Based on operator==
+    // Based on operator==
     template<typename T, typename Container>
         inline bool
     operator!=(const stack<T, Container>& x, const stack<T, Container>& y)
     { return !(x == y); }
 
-    /// Based on operator<
+    // Based on operator<
     template<typename T, typename Container>
         inline bool
     operator>(const stack<T, Container>& x, const stack<T, Container>& y)
     { return y < x; }
 
-     /// Based on operator<
+    // Based on operator<
     template<typename T, typename Container>
     inline bool
         operator<=(const stack<T, Container>& x, const stack<T, Container>& y)
     { return !(y < x); }
 
-    /// Based on operator<
+    // Based on operator<
     template<typename T, typename Container>
     inline bool
         operator>=(const stack<T, Container>& x, const stack<T, Container>& y)

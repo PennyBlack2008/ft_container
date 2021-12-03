@@ -1,9 +1,11 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
-namespace ft {
+namespace ft
+{
 	template<class T1, class T2>
-	struct pair {
+	struct pair
+	{
 		typedef T1 first_type;
 		typedef T2 second_type;
 
@@ -60,40 +62,40 @@ namespace ft {
 	template<class T>
 	class set_key : public std::unary_function<T, T>
 	{
-    public:
-			T&
-				operator()(T& x) const
-			{ return x; }
+	public:
+		T&
+			operator()(T& x) const
+		{ return x; }
 
-			const T&
-				operator()(const T& x) const
-			{ return x; }
+		const T&
+			operator()(const T& x) const
+		{ return x; }
 	};
 
 	template <class Pair>
 	class map_key : public std::unary_function<Pair, typename Pair::first_type>
 	{
-    public:
-			typename Pair::first_type&
-				operator()(Pair& x) const
-			{ return x.first; }
+	public:
+		typename Pair::first_type&
+			operator()(Pair& x) const
+		{ return x.first; }
 
-			const typename Pair::first_type&
-				operator()(const Pair& x) const
-			{ return x.first; }
+		const typename Pair::first_type&
+			operator()(const Pair& x) const
+		{ return x.first; }
 	};
 
 	template <class Pair>
 	class map_value : public std::unary_function<Pair, typename Pair::second_type>
 	{
-    public:
-			typename Pair::second_type&
-				operator()(Pair& x) const
-			{ return x.second; }
+	public:
+		typename Pair::second_type&
+			operator()(Pair& x) const
+		{ return x.second; }
 
-			const typename Pair::second_type&
-				operator()(const Pair& x) const
-			{ return x.second; }
+		const typename Pair::second_type&
+			operator()(const Pair& x) const
+		{ return x.second; }
 	};
 }
 

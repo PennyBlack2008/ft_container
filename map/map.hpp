@@ -248,8 +248,8 @@ namespace ft
      *
      *  Allows for easy lookup with the subscript ( @c [] ) operator.  Returns
      *  data associated with the key specified in subscript.  If the key does
-     *  not exist, a pair with that key is created using default values, which
-     *  is then returned.
+     *  not exist, a pair with that key is created(해당 키에 디폴트 벨류인 노드가 생긴다) 
+     *  using default values, which is then returned.
      *
      *  Lookup requires logarithmic time.
      */

@@ -1152,24 +1152,6 @@ namespace ft
     return iterator(z);
   }
 
-  // template<typename Key, typename Val, typename KeyOfValue,
-  //          typename Compare, typename Alloc>
-  // typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::iterator
-  // RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::
-  // M_insert_lower(Base_ptr x, Base_ptr p, const Val& v)
-  // {
-  //   bool insert_left = (x != 0 || p == M_end()
-  //                       || !M_impl.M_key_compare(S_key(p),
-  //                                                KeyOfValue()(v)));
-
-  //   Link_type z = M_create_node(v);
-
-  //   RB_tree_insert_and_rebalance(insert_left, z, p,  
-  //                                this->M_impl.M_header);
-  //   ++M_impl.M_node_count;
-  //   return iterator(z);
-  // }
-
   template<typename Key, typename Val, typename KeyOfValue,
            typename Compare, typename Alloc>
   typename RB_tree<Key,Val,KeyOfValue,Compare,Alloc>::const_iterator
@@ -1590,7 +1572,7 @@ namespace ft
 
   /* lower_bound, upper_bound
   ** - lower_bound는 k값을 받고 그 k값과 동일하거나 더 큰 첫번째 iterator를 반환
-  **   - 만약 k값에 해당되는 iter가 없다면 예외처리가 없어 segment-fault
+  **   - 만약 k값에 해당되는 iter가 없다면 end iterator(헤더노드 iter)를 반환
   ** - upper_bound는 k값을 받고 그 k값 이후의 iterator를 반환(동일하면 안됨)
   **   - 만약 k값에 해당되는 iter가 없다면 end iterator(헤더노드 iter)를 반환
   **/

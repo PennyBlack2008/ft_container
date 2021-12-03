@@ -635,8 +635,7 @@ namespace ft
           new_finish = ft::uninitialized_copy_a(this->M_impl.M_start, position.base(), new_start, M_get_T_allocator());
           new_finish = ft::uninitialized_copy_a(first, last, new_finish, M_get_T_allocator());
           new_finish = ft::uninitialized_copy_a(position.base(), this->M_impl.M_finish, new_finish, M_get_T_allocator());
-        }
-        catch(...) {
+        } catch(...) {
           ft::Destroy(new_start, new_finish, M_get_T_allocator());
           M_deallocate(new_start, len);
           throw;
@@ -701,9 +700,7 @@ namespace ft
           new_finish =
           ft::uninitialized_copy_a(position.base(), this->M_impl.M_finish,
                                   new_finish, M_get_T_allocator());
-        }
-        catch(...)
-        {
+        } catch(...) {
           ft::Destroy(new_start, new_finish, M_get_T_allocator());
           M_deallocate(new_start, len);
           throw;

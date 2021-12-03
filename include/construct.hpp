@@ -4,38 +4,45 @@
 #include <new>
 #include "cpp_type_traits.hpp"
 
-namespace ft {
+namespace ft
+{
 	template<class T1, class T2>
-	inline void Construct(T1* p, const T2& value) {
+	inline void Construct(T1* p, const T2& value)
+	{
 		new (static_cast<void*>(p))T1(value);
 	}
 
 	template<class T1>
-	inline void Construct(T1* p) {
+	inline void Construct(T1* p)
+	{
 		new (static_cast<void*>(p))T1();
 	}
 
 	template<class T>
-	inline void Destroy(T* pointer) {
+	inline void Destroy(T* pointer)
+	{
 		pointer->~T();
 	}
 
 	template<class ForwardIterator>
-	inline void destroy_aux(ForwardIterator first, ForwardIterator last, false_type) {
+	inline void destroy_aux(ForwardIterator first, ForwardIterator last, false_type)
+	{
 		for (;first != last;++first)
 			ft::Destroy(&*first);
 	}
 
 	template<class ForwardIterator>
-	inline void destroy_aux(ForwardIterator first, ForwardIterator last, true_type) {
+	inline void destroy_aux(ForwardIterator first, ForwardIterator last, true_type)
+	{
 		(void)first;
 		(void)last;
 	}
 
 	template<class ForwardIterator>
-	inline void Destroy(ForwardIterator first, ForwardIterator last) {
-		typedef typename iterator_traits<ForwardIterator>::value_type	Value_type;
-		typedef typename is_scalar<Value_type>::type				 	Has_trivial_destructor;
+	inline void Destroy(ForwardIterator first, ForwardIterator last)
+	{
+		typedef typename iterator_traits<ForwardIterator>::value_type		Value_type;
+		typedef typename is_scalar<Value_type>::type				 						Has_trivial_destructor;
 		ft::destroy_aux(first, last, Has_trivial_destructor());
 	}
 
@@ -50,7 +57,9 @@ namespace ft {
 
 	template<class ForwardIterator, typename T>
 	inline void Destroy(ForwardIterator first, ForwardIterator last, allocator<T>)
-	{ Destroy(first, last); }
+	{ 
+		Destroy(first, last);
+	}
 }
 
 #endif

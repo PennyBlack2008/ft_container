@@ -12,13 +12,16 @@
 
 #include <type_traits>
 
-namespace ft {
-	namespace detail {
+namespace ft
+{
+	namespace detail
+	{
 		typedef char	one;
 		typedef char	two[2];
 
 		template<typename T>
 		one	test_type(int T::*);
+		
 		template<typename T>
 		two&	test_type(...);
 	}
@@ -33,30 +36,35 @@ namespace ft {
 	struct false_type {};
 
 	template<bool>
-	struct truth_type {
+	struct truth_type
+	{
 		typedef false_type type;
 	};
 
 	template<>
-	struct truth_type<true> {
+	struct truth_type<true>
+	{
 		typedef true_type type;
 	};
 
 	template<class S, class T>
-	struct traitor {
+	struct traitor
+	{
 		enum { value = bool(S::value) || bool(T::value) };
 		typedef typename truth_type<value>::type type;
 	};
 
 	// Compare for equality of types.
 	template<typename, typename>
-	struct are_same {
+	struct are_same
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<typename T> 
-	struct are_same<T, T> {
+	struct are_same<T, T>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -66,13 +74,15 @@ namespace ft {
 	-------*/
 	// Holds if the template-argument is a void type.
 	template<typename T>
-	struct is_void {
+	struct is_void
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<>
-	struct is_void<void> {
+	struct is_void<void>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -81,13 +91,15 @@ namespace ft {
 	is_integer
 	----------*/
 	template<class T>
-	struct is_integer {
+	struct is_integer
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<>
-	struct is_integer<bool> {
+	struct is_integer<bool>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -97,67 +109,78 @@ namespace ft {
 	 * 		is_integer<'c'>::type == true_type가 된다.
 	 **/
 	template<>
-	struct is_integer<char> {
+	struct is_integer<char>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<signed char> {
+	struct is_integer<signed char>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<unsigned char> {
+	struct is_integer<unsigned char>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<short> {
+	struct is_integer<short>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<unsigned short> {
+	struct is_integer<unsigned short>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<int> {
+	struct is_integer<int>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<unsigned int> {
+	struct is_integer<unsigned int>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<long> {
+	struct is_integer<long>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<unsigned long> {
+	struct is_integer<unsigned long>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<long long> {
+	struct is_integer<long long>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_integer<unsigned long long> {
+	struct is_integer<unsigned long long>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -166,25 +189,29 @@ namespace ft {
 	is_floating
 	-----------*/
 	template<typename T>
-	struct is_floating {
+	struct is_floating
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<>
-	struct is_floating<float> {
+	struct is_floating<float>
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<>
-	struct is_floating<double> {
+	struct is_floating<double>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
 
 	template<>
-	struct is_floating<long double> {
+	struct is_floating<long double>
+	{
 		enum { value = 0 };
 		typedef true_type type;
 	};
@@ -193,13 +220,15 @@ namespace ft {
 	is_pointer
 	----------*/
 	template<typename T>
-	struct is_pointer {
+	struct is_pointer
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<typename T>
-	struct is_pointer<T*> {
+	struct is_pointer<T*>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -208,13 +237,15 @@ namespace ft {
 	Normal iterator type
 	------------------*/
 	template<typename T>
-	struct is_normal_iterator {
+	struct is_normal_iterator
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<typename Iterator, typename Container>
-	struct is_normal_iterator<ft::normal_iterator<Iterator, Container> > {
+	struct is_normal_iterator<ft::normal_iterator<Iterator, Container> >
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -243,7 +274,8 @@ namespace ft {
 	----*/
 	// For the immediate use, the following is a good approximation.
 	template<typename T>
-	struct is_pod {
+	struct is_pod
+	{
 		enum { value = (sizeof(detail::test_type<T>(0)) != sizeof(detail::one)) };
 	};
 
@@ -251,7 +283,8 @@ namespace ft {
 	is_empty
 	--------*/
 	template<typename T>
-	struct is_empty {
+	struct is_empty
+	{
 		private:
 			template<typename>
 			struct first { };
@@ -265,13 +298,15 @@ namespace ft {
 	-------*/
 	//For use in std::copy and std::find overloads for streambuf iterators.
 	template<typename T>
-	struct is_char {
+	struct is_char
+	{
 		enum { value = 0 };
 		typedef false_type type;
 	};
 
 	template<>
-	struct is_char<char> {
+	struct is_char<char>
+	{
 		enum { value = 1 };
 		typedef true_type type;
 	};
@@ -281,6 +316,7 @@ namespace ft {
 	---------*/
 	template <bool B, class If, class Then>
 	struct conditional { typedef If type; };
+	
 	template <class If, class Then>
 	struct conditional<false, If, Then> { typedef Then type; };
 }

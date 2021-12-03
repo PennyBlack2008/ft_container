@@ -9,7 +9,8 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace ft {
+namespace ft
+{
 	/**
 	 * enable_if, SFINAE을 이용해서 true가 아니게 되면 오버로딩 후보에서 제외한다. 
 	 * aka. 템플릿들을 위한 컴파일 타임 스위치
@@ -19,22 +20,21 @@ namespace ft {
 	struct enable_if { };
 
 	template<typename T>
-	struct enable_if<true, T> {
-		typedef T type;
-	};
+	struct enable_if<true, T>
+	{ typedef T type; };
 
 	/**
 	 * integral_constant, 모든 정수 계열 상수 값을 타입으로 만들어주는 템플릿.
 	 * is_pointer등의 type_traits를 만들 때 이것을 기반으로 간소화 및 가독성을 높일 수 있음 
 	 **/
 	template<typename T, T v>
-	struct integral_constant {
+	struct integral_constant
+	{
 		static const T				value = v;
 		typedef T					value_type;
 		typedef integral_constant	type;
-		operator value_type() const {
-			return value;
-		}
+		operator value_type() const
+		{ return value; }
 	};
 
 	// __is_integral 이미 존재하고 있음.

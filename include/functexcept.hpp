@@ -5,7 +5,8 @@
 #include <string>
 
 namespace ft {
-	class runtime_error : public std::exception {
+	class runtime_error : public std::exception
+	{
 		private:
 			std::string msg;
 		public:
@@ -14,17 +15,20 @@ namespace ft {
 			virtual const char* what() const throw();
 	};
 
-	class range_error : public runtime_error {
+	class range_error : public runtime_error
+	{
 		public:
 			explicit range_error(const std::string& arg);
 	};
 
-	class overflow_error : public runtime_error {
+	class overflow_error : public runtime_error
+	{
 		public:
 			explicit overflow_error(const std::string& arg);
 	};
 
-	class underflow_error : public runtime_error {
+	class underflow_error : public runtime_error
+	{
 		public:
 			explicit underflow_error(const std::string& arg);
 	};
