@@ -34,7 +34,7 @@ namespace vector_test
     {
       if (*it1 != *it2)
         return false;
-      it1--; it2--;
+      it1++; it2++;
     }
     return true;
   }
@@ -96,25 +96,26 @@ namespace vector_test
     else
       std::cout << REDCOLOR << "::operator=, size X" << RESET << std::endl;
 
-    ft_bar.resize(1);
-    ft_foo.resize(1);
-    std_bar.resize(10);
-    std_foo.resize(10);
+    ft::vector<int> ft_zoo;
+    std::vector<int> std_zoo;
 
-    if ((ft_foo.size() == std_foo.size()) &&
-        (ft_bar.size() == std_bar.size()))
+    for (int i=1; i<10; i++) ft_zoo.push_back(i);
+    for (int i=1; i<10; i++) std_zoo.push_back(i);
+
+    ft_zoo.resize(5);
+    std_zoo.resize(5);
+
+    if ((ft_zoo.size() == std_zoo.size()))
       std::cout << GREEN << "resize OK" << RESET << std::endl;
     else
       std::cout << REDCOLOR << "resize X" << RESET << std::endl;
 
-    if ((ft_foo.capacity() == std_foo.capacity()) &&
-        (ft_bar.capacity() == std_bar.capacity()))
+    if (ft_zoo.capacity() == std_zoo.capacity())
       std::cout << GREEN << "capacity OK" << RESET << std::endl;
     else
       std::cout << REDCOLOR << "capacity X" << RESET << std::endl;
 
-    if ((ft_foo.max_size() == std_foo.max_size()) &&
-        (ft_bar.max_size() == std_bar.max_size()))
+    if (ft_zoo.max_size() == std_zoo.max_size())
       std::cout << GREEN << "max_size OK" << RESET << std::endl;
     else
       std::cout << REDCOLOR << "max_size X" << RESET << std::endl;
@@ -208,22 +209,18 @@ namespace vector_test
     ft_first.assign (7,100);             // 7 ints with a value of 100
     std_first.assign (7,100);             // 7 ints with a value of 100
 
-    ft::vector<int>::iterator ft_it;
+    ft::vector<int>::iterator ft_it = ft_first.begin();
     ft_first.insert(ft_it, 50);
-    ft_first.erase(ft_it+3);
-    ft_it=ft_first.begin()+1;
+    ft::vector<int>::iterator ft_itz = ft_first.begin();
+    ft_first.erase(ft_itz);
 
-    std::vector<int>::iterator std_it;
+    std::vector<int>::iterator std_it = std_first.begin();
     std_first.insert(std_it, 50);
-    std_first.erase(std_it+3);
-    std_it=std_first.begin()+1;
+    std::vector<int>::iterator std_itz = std_first.begin();
+    std_first.erase(std_itz);
 
-    int myints[] = {1776,7,4};
-    ft_second.assign (myints,myints+3);   // assigning from array.
-    std_second.assign (myints,myints+3);   // assigning from array.
 
-    if (check_ft_with_std(ft_first, std_first) &&
-        check_ft_with_std(ft_second, std_second))
+    if (check_ft_with_std(ft_first, std_first))
       std::cout << GREEN << "assign, insert, erase OK" << RESET << std::endl;
     else
       std::cout << REDCOLOR << "assign, insert, erase X" << RESET << std::endl;
@@ -273,7 +270,7 @@ void test_vector_all()
 {
   vector_test::test_constructor();
   vector_test::test_size();
-  // vector_test::test_reverse_iterator();
+  vector_test::test_reverse_iterator();
   vector_test::test_at();
   vector_test::test_modifier();
 }

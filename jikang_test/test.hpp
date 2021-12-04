@@ -4,7 +4,7 @@
 #include <iostream>
 
 #define RESET   "\033[0m"
-#define REDCOLOR     "\033[31m"      /* Red */
+#define REDCOLOR "\033[31m"      /* Red */
 #define GREEN   "\033[32m"      /* Green */
 
 void test_vector_all();
