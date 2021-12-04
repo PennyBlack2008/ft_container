@@ -6,6 +6,7 @@
 #include "../include/uninitialized.hpp"
 #include "../include/functexcept.hpp"
 #include "../include/algorithm.hpp"
+#include "../include/cpp_type_traits.hpp"
 
 namespace ft
 {
@@ -182,7 +183,7 @@ namespace ft
 
     const_reverse_iterator rbegin() const
     {
-      return reverse_iterator(end());
+      return const_reverse_iterator(end());
     }
 
     reverse_iterator rend()
@@ -192,7 +193,7 @@ namespace ft
 
     const_reverse_iterator rend() const
     {
-      return reverse_iterator(begin());
+      return const_reverse_iterator(begin());
     }
 
     /*------

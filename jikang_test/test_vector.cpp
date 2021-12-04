@@ -1,127 +1,279 @@
-#include <iostream>
-#include "../vector/vector.hpp"
+#include "test.hpp"
 #include <vector>
+#include "../vector/vector.hpp"
 
-#define RESET   "\033[0m"
-#define BLACK   "\033[30m"      /* Black */
-#define RED     "\033[31m"      /* Red */
-#define GREEN   "\033[32m"      /* Green */
-#define YELLOW  "\033[33m"      /* Yellow */
-#define BLUE    "\033[34m"      /* Blue */
-#define MAGENTA "\033[35m"      /* Magenta */
-#define CYAN    "\033[36m"      /* Cyan */
-#define WHITE   "\033[37m"      /* White */
-#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
-#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
-#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
-#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
-#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
-#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
-#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
-#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
 
-template <typename T>
-bool check_ft_with_std(const ft::vector<T>& ft_con, const std::vector<T>& std_con)
+namespace vector_test
 {
-  typename ft::vector<T>::const_iterator it1;
-  typename std::vector<T>::const_iterator it2;
-
-  it1 = ft_con.begin();
-  it2 = std_con.begin();
-  while (it1 != ft_con.end())
+  template <typename T>
+  bool check_ft_with_std(const ft::vector<T>& ft_con, const std::vector<T>& std_con)
   {
-    if (*it1 != *it2)
-      return false;
-    it1++; it2++;
+    typename ft::vector<T>::const_iterator it1;
+    typename std::vector<T>::const_iterator it2;
+
+    it1 = ft_con.begin();
+    it2 = std_con.begin();
+    while (it1 != ft_con.end())
+    {
+      if (*it1 != *it2)
+        return false;
+      it1++; it2++;
+    }
+    return true;
   }
-  return true;
-}
 
-template <typename T>
-bool check_ft_with_std_rev(const ft::vector<T>& ft_con, const std::vector<T>& std_con)
-{
-  typename ft::vector<T>::const_reverse_iterator it1;
-  typename std::vector<T>::const_reverse_iterator it2;
-
-  it1 = ft_con.rbegin();
-  it2 = std_con.rbegin();
-  while (it1 != ft_con.rend())
+  template <typename T>
+  bool check_ft_with_std_rev(const ft::vector<T>& ft_con, const std::vector<T>& std_con)
   {
-    if (*it1 != *it2)
-      return false;
-    it1--; it2--;
+    typename ft::vector<T>::const_reverse_iterator it1;
+    typename std::vector<T>::const_reverse_iterator it2;
+
+    it1 = ft_con.rbegin();
+    it2 = std_con.rbegin();
+    while (it1 != ft_con.rend())
+    {
+      if (*it1 != *it2)
+        return false;
+      it1--; it2--;
+    }
+    return true;
   }
-  return true;
+
+  /** 1.Constructor
+   ** https://www.cplusplus.com/reference/vector/vector/vector/ **/
+  void test_constructor()
+  {
+    ft::vector<int> ft_first;                                // empty vector of ints
+    ft::vector<int> ft_second (4,100);                       // four ints with value 100
+    ft::vector<int> ft_third (ft_second.begin(),ft_second.end());  // iterating through second
+    ft::vector<int> ft_fourth (ft_third);                       // a copy of third
+
+    std::vector<int> std_first;                                // empty vector of ints
+    std::vector<int> std_second (4,100);                       // four ints with value 100
+    std::vector<int> std_third (std_second.begin(),std_second.end());  // iterating through second
+    std::vector<int> std_fourth (std_third);                       // a copy of third
+
+    if (check_ft_with_std(ft_first, std_first) &&
+        check_ft_with_std(ft_second, std_second) &&
+        check_ft_with_std(ft_third, std_third) &&
+        check_ft_with_std(ft_fourth, std_fourth))
+      std::cout << GREEN << "Contstruct OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "Contstruct X" << RESET << std::endl;
+  }
+
+  /** 2.::operator=, size
+   **/
+  void test_size()
+  {
+    ft::vector<char> ft_empty;
+    std::vector<char> std_empty;
+
+    if (ft_empty.empty() == std_empty.empty())
+      std::cout << GREEN << "empty OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "empty X" << RESET << std::endl;
+
+    ft::vector<int> ft_foo (3,0);
+    ft::vector<int> ft_bar (5,0);
+    std::vector<int> std_foo (3,0);
+    std::vector<int> std_bar (5,0);
+
+    if ((ft_foo.size() == std_foo.size()) &&
+        (ft_bar.size() == std_bar.size()))
+      std::cout << GREEN << "size OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "size X" << RESET << std::endl;
+
+    ft_bar = ft_foo;
+    ft_foo = ft::vector<int>();
+    std_bar = std_foo;
+    std_foo = std::vector<int>();
+
+    if ((ft_foo.size() == std_foo.size()) &&
+        (ft_bar.size() == std_bar.size()))
+      std::cout << GREEN << "::operator=, size OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "::operator=, size X" << RESET << std::endl;
+
+    ft_bar.resize(1);
+    ft_foo.resize(1);
+    std_bar.resize(10);
+    std_foo.resize(10);
+
+    if ((ft_foo.size() == std_foo.size()) &&
+        (ft_bar.size() == std_bar.size()))
+      std::cout << GREEN << "resize OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "resize X" << RESET << std::endl;
+
+    if ((ft_foo.capacity() == std_foo.capacity()) &&
+        (ft_bar.capacity() == std_bar.capacity()))
+      std::cout << GREEN << "capacity OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "capacity X" << RESET << std::endl;
+
+    if ((ft_foo.max_size() == std_foo.max_size()) &&
+        (ft_bar.max_size() == std_bar.max_size()))
+      std::cout << GREEN << "max_size OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "max_size X" << RESET << std::endl;
+  }
+
+  /** 3. reverse_iterator
+   **/
+  void test_reverse_iterator()
+  {
+    ft::vector<int> ft_first;                                // empty vector of ints
+    ft::vector<int> ft_second (4,100);                       // four ints with value 100
+    ft::vector<int> ft_third (ft_second.begin(),ft_second.end());  // iterating through second
+    ft::vector<int> ft_fourth (ft_third);                       // a copy of third
+
+    std::vector<int> std_first;                                // empty vector of ints
+    std::vector<int> std_second (4,100);                       // four ints with value 100
+    std::vector<int> std_third (std_second.begin(),std_second.end());  // iterating through second
+    std::vector<int> std_fourth (std_third);                       // a copy of third
+
+    if (check_ft_with_std_rev(ft_first, std_first) &&
+        check_ft_with_std_rev(ft_second, std_second) &&
+        check_ft_with_std_rev(ft_third, std_third) &&
+        check_ft_with_std_rev(ft_fourth, std_fourth))
+      std::cout << GREEN << "reverse iterator OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "reverse iterator X" << RESET << std::endl;
+  }
+
+  /** 4. [], at 
+   **/
+  void test_at()
+  {
+    ft::vector<int> ft_myvector (10);
+    ft::vector<int>::size_type ft_sz = ft_myvector.size();
+
+    std::vector<int> std_myvector (10);
+    std::vector<int>::size_type std_sz = std_myvector.size();
+
+    for (unsigned i=0; i<ft_sz; i++) ft_myvector[i]=i;
+    for (unsigned i=0; i<std_sz; i++) std_myvector[i]=i;
+
+    if (check_ft_with_std(ft_myvector, std_myvector))
+      std::cout << GREEN << "[] OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "[] X" << RESET << std::endl;
+
+    for (unsigned i=0; i<ft_sz; i++) ft_myvector.at(i)=2*i;
+    for (unsigned i=0; i<std_sz; i++) std_myvector.at(i)=2*i;
+
+    if (check_ft_with_std(ft_myvector, std_myvector))
+      std::cout << GREEN << "at OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "at X" << RESET << std::endl;
+
+    ft_myvector.front() -= ft_myvector.back();
+    std_myvector.front() -= std_myvector.back();
+    
+    if (check_ft_with_std(ft_myvector, std_myvector))
+      std::cout << GREEN << "front, back OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "front, back X" << RESET << std::endl;
+  }
+
+  /** 5.modifier
+   **/
+  void test_modifier()
+  {
+    ft::vector<int> ft_first;
+    ft::vector<int> ft_second;
+    ft::vector<int> ft_third;
+    ft::vector<int> ft_fourth;
+    ft::vector<int> ft_fifth;
+
+    std::vector<int> std_first;
+    std::vector<int> std_second;
+    std::vector<int> std_third;
+    std::vector<int> std_fourth;
+    std::vector<int> std_fifth;
+
+    ft_fifth.assign (7,100);             // 7 ints with a value of 100
+    std_fifth.assign (7,100);             // 7 ints with a value of 100
+
+    ft_fifth.clear();
+    std_fifth.clear();
+
+    if (ft_fifth.empty() == std_fifth.empty())
+      std::cout << GREEN << "clear OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "clear X" << RESET << std::endl;
+
+    ft_first.assign (7,100);             // 7 ints with a value of 100
+    std_first.assign (7,100);             // 7 ints with a value of 100
+
+    ft::vector<int>::iterator ft_it;
+    ft_first.insert(ft_it, 50);
+    ft_first.erase(ft_it+3);
+    ft_it=ft_first.begin()+1;
+
+    std::vector<int>::iterator std_it;
+    std_first.insert(std_it, 50);
+    std_first.erase(std_it+3);
+    std_it=std_first.begin()+1;
+
+    int myints[] = {1776,7,4};
+    ft_second.assign (myints,myints+3);   // assigning from array.
+    std_second.assign (myints,myints+3);   // assigning from array.
+
+    if (check_ft_with_std(ft_first, std_first) &&
+        check_ft_with_std(ft_second, std_second))
+      std::cout << GREEN << "assign, insert, erase OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "assign, insert, erase X" << RESET << std::endl;
+
+    ft_third.push_back(100);
+    ft_third.push_back(200);
+    ft_third.push_back(300);
+
+    std_third.push_back(100);
+    std_third.push_back(200);
+    std_third.push_back(300);
+
+    if (check_ft_with_std(ft_third, std_third))
+      std::cout << GREEN << "push_back OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "push_back X" << RESET << std::endl;
+    
+    int ft_sum = 0;
+    int std_sum = 0;
+
+    while (!ft_third.empty())
+    {
+      ft_sum += ft_third.back();
+      ft_third.pop_back();  
+    }
+    while (!std_third.empty())
+    {
+      std_sum += std_third.back();
+      std_third.pop_back();  
+    }
+
+    if (check_ft_with_std(ft_third, std_third))
+      std::cout << GREEN << "pop_back OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "pop_back X" << RESET << std::endl;
+
+    ft_fourth.reserve(10);
+    std_fourth.reserve(10);
+    if (ft_fourth.capacity() == std_fourth.capacity())
+      std::cout << GREEN << "capacity OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "capacity X" << RESET << std::endl;
+  }
 }
 
-/** 1.Constructor
- ** https://www.cplusplus.com/reference/vector/vector/vector/ **/
-void test_constructor()
+void test_vector_all()
 {
-  ft::vector<int> ft_first;                                // empty vector of ints
-  ft::vector<int> ft_second (4,100);                       // four ints with value 100
-  ft::vector<int> ft_third (ft_second.begin(),ft_second.end());  // iterating through second
-  ft::vector<int> ft_fourth (ft_third);                       // a copy of third
-
-  std::vector<int> std_first;                                // empty vector of ints
-  std::vector<int> std_second (4,100);                       // four ints with value 100
-  std::vector<int> std_third (std_second.begin(),std_second.end());  // iterating through second
-  std::vector<int> std_fourth (std_third);                       // a copy of third
-
-  if (check_ft_with_std(ft_first, std_first) &&
-      check_ft_with_std(ft_second, std_second) &&
-      check_ft_with_std(ft_third, std_third) &&
-      check_ft_with_std(ft_fourth, std_fourth))
-    std::cout << GREEN << "Contstruct OK" << RESET << std::endl;
-  else
-    std::cout << RED << "Contstruct X" << RESET << std::endl;
-}
-
-/** 2.::operator=, size
- **/
-void test_size()
-{
-  ft::vector<int> ft_foo (3,0);
-  ft::vector<int> ft_bar (5,0);
-
-  ft_bar = ft_foo;
-  ft_foo = ft::vector<int>();
-
-  std::vector<int> std_foo (3,0);
-  std::vector<int> std_bar (5,0);
-
-  std_bar = std_foo;
-  std_foo = std::vector<int>();
-
-  std::cout << "Size of foo: " << int(std_foo.size()) << '\n';
-  std::cout << "Size of bar: " << int(std_bar.size()) << '\n';
-
-  if ((ft_foo.size() == std_foo.size()) &&
-      (ft_bar.size() == std_bar.size()))
-    std::cout << GREEN << "::operator=, size OK" << RESET << std::endl;
-  else
-    std::cout << RED << "::operator=, size X" << RESET << std::endl;
-}
-
-/** 3. reverse_iterator
- **/
-void test_reverse_iterator()
-{
-  ft::vector<int> ft_first;                                // empty vector of ints
-  ft::vector<int> ft_second (4,100);                       // four ints with value 100
-  ft::vector<int> ft_third (ft_second.begin(),ft_second.end());  // iterating through second
-  ft::vector<int> ft_fourth (ft_third);                       // a copy of third
-
-  std::vector<int> std_first;                                // empty vector of ints
-  std::vector<int> std_second (4,100);                       // four ints with value 100
-  std::vector<int> std_third (std_second.begin(),std_second.end());  // iterating through second
-  std::vector<int> std_fourth (std_third);                       // a copy of third
-
-  if (check_ft_with_std_rev(ft_first, std_first) &&
-      check_ft_with_std_rev(ft_second, std_second) &&
-      check_ft_with_std_rev(ft_third, std_third) &&
-      check_ft_with_std_rev(ft_fourth, std_fourth))
-    std::cout << GREEN << "reverse iterator OK" << RESET << std::endl;
-  else
-    std::cout << RED << "reverse iterator X" << RESET << std::endl;
+  vector_test::test_constructor();
+  vector_test::test_size();
+  // vector_test::test_reverse_iterator();
+  vector_test::test_at();
+  vector_test::test_modifier();
 }
