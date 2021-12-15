@@ -10,6 +10,8 @@ namespace map_test
     typename ft::map<T1, T2>::const_iterator it1;
     typename std::map<T1, T2>::const_iterator it2;
 
+    if (ft_con.size() != std_con.size())
+      return false;
     it1 = ft_con.begin();
     it2 = std_con.begin();
     while (it1 != ft_con.end())
@@ -140,8 +142,44 @@ namespace map_test
     else
       std::cout << REDCOLOR << "clear X" << RESET << std::endl;
   }
+
+  void get_allocator_test()
+  {
+    ft::map<char, int> ft_map;
+    std::map<char, int> std_map;
+    ft::pair<const char, int>* ft_p;
+    std::pair<const char, int>* std_p;
+    
+    bool success = 1;
+
+    ft_p = ft_map.get_allocator().allocate(5);
+    std_p = std_map.get_allocator().allocate(5);
+
+    for (int i = 0; i < 5; i++)
+    {
+      ft_map.get_allocator().construct(&ft_p[i], ft::pair<int, int>(i, i));
+      std_map.get_allocator().construct(&std_p[i], std::pair<int, int>(i, i));
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+      if (ft_p[i].first != std_p[i].first &&
+          ft_p[i].second != std_p[i].second)
+      {
+        std::cout << REDCOLOR << "get_allocator X" << RESET << std::endl;
+        success = 0;
+      }
+    }
+    if (success)
+      std::cout << GREEN << "get_allocator OK" << RESET << std::endl;
+
+    ft_map.get_allocator().deallocate(ft_p, 5);
+    std_map.get_allocator().deallocate(std_p, 5);
+  }
 }
+
 void test_map_all()
 {
   map_test::test_map();
+  map_test::get_allocator_test();
 }

@@ -2,7 +2,6 @@
 #include <vector>
 #include "../vector/vector.hpp"
 
-
 namespace vector_test
 {
   template <typename T>
@@ -11,6 +10,8 @@ namespace vector_test
     typename ft::vector<T>::const_iterator it1;
     typename std::vector<T>::const_iterator it2;
 
+    if (ft_con.size() != std_con.size())
+      return false;
     it1 = ft_con.begin();
     it2 = std_con.begin();
     while (it1 != ft_con.end())
@@ -264,6 +265,71 @@ namespace vector_test
     else
       std::cout << REDCOLOR << "capacity X" << RESET << std::endl;
   }
+
+  /** 6.get_allocator()
+   **/
+  void get_allocator()
+  {
+    ft::vector<int> ft_vector;
+    std::vector<int> std_vector;
+    bool success = 1;
+
+    int *ft_p, *std_p;
+    ft_p = ft_vector.get_allocator().allocate(5);
+    std_p = ft_vector.get_allocator().allocate(5);
+
+    for (int i = 0; i < 5; i++)
+    {
+      ft_vector.get_allocator().construct(&ft_p[i], i);
+      std_vector.get_allocator().construct(&std_p[i], i);
+    }
+
+    for (int i = 0; i < 5; i++)
+    {
+      if (ft_p[i] != std_p[i])
+      {
+        std::cout << REDCOLOR << "get_allocator X" << RESET << std::endl;
+        success = 0;
+      }
+    }
+    if (success)
+      std::cout << GREEN << "get_allocator OK" << RESET << std::endl;
+    
+    ft_vector.get_allocator().deallocate(ft_p, 5);
+    std_vector.get_allocator().deallocate(std_p, 5);
+  }
+
+  void relational_operators()
+  {
+    ft::vector<int> ft_foo (3,100);   // three ints with a value of 100
+    ft::vector<int> ft_bar (2,200);   // two ints with a value of 200
+    std::vector<int> std_foo (3,100);   // three ints with a value of 100
+    std::vector<int> std_bar (2,200);   // two ints with a value of 200
+
+    int ft_bool1 = (ft_foo == ft_bar);
+    int ft_bool2 = (ft_foo != ft_bar);
+    int ft_bool3 = (ft_foo < ft_bar);
+    int ft_bool4 = (ft_foo > ft_bar);
+    int ft_bool5 = (ft_foo <= ft_bar);
+    int ft_bool6 = (ft_foo >= ft_bar);
+
+    int std_bool1 = (std_foo == std_bar);
+    int std_bool2 = (std_foo != std_bar);
+    int std_bool3 = (std_foo < std_bar);
+    int std_bool4 = (std_foo > std_bar);
+    int std_bool5 = (std_foo <= std_bar);
+    int std_bool6 = (std_foo >= std_bar);
+
+    if ((ft_bool1 == std_bool1) &&
+        (ft_bool2 == std_bool2) &&
+        (ft_bool3 == std_bool3) &&
+        (ft_bool4 == std_bool4) &&
+        (ft_bool5 == std_bool5) &&
+        (ft_bool6 == std_bool6))
+      std::cout << GREEN << "relational operators OK" << RESET << std::endl;
+    else
+      std::cout << REDCOLOR << "relational operators X" << RESET << std::endl;
+  }
 }
 
 void test_vector_all()
@@ -273,4 +339,6 @@ void test_vector_all()
   vector_test::test_reverse_iterator();
   vector_test::test_at();
   vector_test::test_modifier();
+  vector_test::get_allocator();
+  vector_test::relational_operators();
 }

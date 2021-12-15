@@ -6,7 +6,6 @@
 #include "../include/uninitialized.hpp"
 #include "../include/functexcept.hpp"
 #include "../include/algorithm.hpp"
-#include "../include/cpp_type_traits.hpp"
 
 namespace ft
 {
@@ -20,7 +19,9 @@ namespace ft
     typedef typename Alloc::template rebind<T>::other   T_alloc_type;
     typedef typename Alloc::pointer	            		    pointer;
     typedef typename Alloc::const_pointer	              const_pointer;
-    /* Vector_impl 구조체는 container의 기초적인 3개의 멤버변수를 초기화해서 Vector에서 사용할 수 있도록 준비해놓는다. */
+    
+    /* Vector_impl 구조체는 container의 기초적인 3개의 멤버변수를 초기화해서
+       Vector에서 사용할 수 있도록 준비해놓는다. */
     struct Vector_impl : public T_alloc_type
     {
       T*      M_start; // 메모리의 시작점
@@ -46,8 +47,8 @@ namespace ft
     const T_alloc_type&   M_get_T_allocator() const
     { return *static_cast<const T_alloc_type*>(&this->M_impl); }
 
-    allocator_type        get_allocator() const
-    { return allocator_type(M_get_T_allocator()); }
+    // allocator_type        get_allocator() const
+    // { return allocator_type(M_get_T_allocator()); }
 
     /* constructor */
     Vector_base() : M_impl() {}
@@ -133,6 +134,8 @@ namespace ft
                                                        this->M_impl.M_start,
                                                        M_get_T_allocator());
     }
+    allocator_type        get_allocator() const
+    { return allocator_type(M_get_T_allocator()); }
 
     /* 벡터의 범위(first, last)를 복사합니다. */
     template<typename InputIterator>
@@ -561,7 +564,8 @@ namespace ft
     vector<T, Alloc>::M_assign(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag)
   {
     const size_type len = std::distance(first, last);
-    if (len > capacity()) {
+    if (len > capacity())
+    {
       pointer tmp(M_allocate_and_copy(len, first, last));
       ft::Destroy(this->M_impl.M_start, this->M_impl.M_finish, M_get_T_allocator());
       M_deallocate(this->M_impl.M_start, this->M_impl.M_end_of_storage - this->M_impl.M_start);
@@ -571,7 +575,8 @@ namespace ft
     }
     else if (size() >= len)
       M_erase_at_end(std::copy(first, last, this->M_impl.M_start));
-    else {
+    else
+    {
       ForwardIterator mid = first;
       std::advance(mid, size());
       std::copy(first, mid, this->M_impl.M_start);

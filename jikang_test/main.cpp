@@ -1,4 +1,5 @@
 #include "test.hpp"
+#include "unistd.h"
 
 void print_title(std::string title)
 {
@@ -16,5 +17,7 @@ int main(void)
   print_title("Map");  
   test_map_all();
   
+
+  system("leaks jikang_test_program > leaks_result_temp; cat leaks_result_temp | grep leaked && rm -rf leaks_result_temp");
   return 0;
 }
